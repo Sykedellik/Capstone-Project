@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Exam System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* ============================================================
+           CLEAN LAYOUT — mirrors the college portal exactly
+           sidebar.width  --> 260px open  /  88px collapsed
+           main margin-left mirrors sidebar at all times
+           NO transforms on the sidebar itself
+           ============================================================ */
+
+        :root {
+            --sidebar-w: 260px;
+            --sidebar-collapsed: 88px;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #dc2626;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --success-text: #166534;
+            --danger-bg: #fef2f2;
+            --danger-border: #fecaca;
+            --danger-text: #b91c1c;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-soft: #64748b;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html, body {
+            overflow-x: hidden;
+        }
+
+        /* ---- APP SHELL ---- */
+        .app-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ---- SIDEBAR ---- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #1e293b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .sidebar.sidebar-mini {
+            width: var(--sidebar-collapsed);
+        }
+
+        .sidebar-mini .nav-label,
+        .sidebar-mini .brand-label,
+        .sidebar-mini .sidebar-footer-label {
+            display: none;
+        }
+
+        .sidebar-mini .nav-link {
+            justify-content: center;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .sidebar-mini .nav-link i {
+            margin-right: 0;
+        }
+
+        .sidebar-mini .sidebar-brand {
+            justify-content: center;
+        }
+
+        /* ---- MAIN CONTENT ---- */
+        .main-content {
+            margin-left: var(--sidebar-w);
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .sidebar-mini ~ .main-content,
+        .sidebar.sidebar-mini ~ .main-content {
+            margin-left: var(--sidebar-collapsed);
+        }
+
+        /* ---- MOBILE: bottom nav overrides sidebar ---- */
+        @media screen and (max-width: 1023px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding-bottom: 72px;
+            }
+
+            .mobile-top-toggle {
+                display: flex !important;
+            }
+        }
+
+        .mobile-top-toggle {
+            display: none;
+        }
+
+        /* ---- DASHBOARD SIDEBAR RESTORATION AT DESKTOP BREAKPOINT ---- */
+        /* Every property hidden/animated at 1023px is explicitly restored here.
+           Without this, browser reflow on window resize can leave .sidebar
+           permanently stuck at display:none.                                   */
+        @media screen and (min-width: 1024px) {
+            .sidebar {
+                display: flex !important;
+            }
+
+            .main-content {
+                margin-left: var(--sidebar-w) !important;
+                padding-bottom: 0 !important;
+            }
+
+            .mobile-top-toggle {
+                display: none !important;
+            }
+
+            .sidebar-mini ~ .main-content {
+                margin-left: var(--sidebar-collapsed) !important;
+            }
+        }
+
+        /* ---- SIDEBAR NAV ---- */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: background-color 0.18s, color 0.18s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .nav-link.is-active {
+            background: rgba(59, 130, 246, 0.18);
+            color: #fff;
+            box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.28);
+        }
+
+        .nav-link i {
+            flex-shrink: 0;
+            width: 18px;
+        }
+
+        /* ---- CONTENT HEADER ---- */
+        .content-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            height: 56px;
+            padding: 0 1rem;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (min-width: 768px) {
+            .content-header {
+                height: 60px;
+                padding: 0 2rem;
+            }
+        }
+
+        /* ---- MOBILE BOTTOM NAV ---- */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.07);
+        }
+
+        @media screen and (max-width: 1023px) {
+            .mobile-nav {
+                display: flex;
+            }
+        }
+
+        .mobile-nav-link {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 0.5rem 0;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .mobile-nav-link.active { color: var(--primary); }
+
+        /* ---- TOGGLE BUTTON (inside header on mobile, inside sidebar on desktop) ---- */
+        .toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            width: 36px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .toggle-btn:hover { background: var(--primary-hover); }
+
+        /* ---- CARDS ---- */
+        .card, .ui-card, .exam-card, .subject-card, .table-shell, .form-shell {
+            background: var(--surface);
+            padding: 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+        }
+
+        .card { padding: 1rem; }
+
+        /* ---- BUTTONS ---- */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0.375rem;
+            padding: 0.6rem 1.125rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0.375rem;
+            padding: 0.6rem 1.125rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--surface-muted);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0.375rem;
+            padding: 0.6rem 1.125rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            border: none;
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-danger:hover { background: #b91c1c; }
+
+        /* ---- FORM FIELDS ---- */
+        .field-label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .field-input, .field-select, .field-textarea {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: var(--text);
+            border-radius: 0.375rem;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .field-input:focus, .field-select:focus, .field-textarea:focus {
+            border-color: var(--primary);
+        }
+
+        /* ---- TYPOGRAPHY HELPERS ---- */
+        .text-h1 { font-size: 1.5rem; font-weight: 600; color: var(--text); }
+        .text-h2 { font-size: 1rem; font-weight: 600; color: var(--text); }
+        .text-body { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; }
+        .text-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--text-soft);
+        }
+
+        /* ── line clamping (CDN Tailwind line-clamp plugin is unreliable) ── */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .leading-snug { line-height: 1.375; }
+
+        /* ---- MESSAGES ---- */
+        .message {
+            border-radius: 0.6rem;
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+        }
+        .message-success { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+        .message-error   { background: var(--danger-bg);   border-color: var(--danger-border);   color: var(--danger-text);   }
+
+        /* ---- CONFIRM MODAL ---- */
+        .confirm-modal[hidden] { display: none !important; }
+        .confirm-modal {
+            position: fixed; inset: 0; z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem;
+        }
+        .confirm-modal__backdrop {
+            position: absolute; inset: 0;
+            background: rgba(15,23,42,0.5);
+            backdrop-filter: blur(3px);
+        }
+        .confirm-modal__dialog {
+            position: relative;
+            width: min(100%, 30rem);
+            background: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 15px 30px rgba(15,23,42,0.15);
+            padding: 1.5rem;
+        }
+        .confirm-modal__title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .confirm-modal__body  { font-size: 0.875rem; color: var(--text-muted); }
+        .confirm-modal__actions { margin-top: 1.25rem; display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+        .ui-button {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            border: 1px solid transparent;
+            border-radius: 0.6rem;
+            padding: 0.55rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+        .ui-button-primary   { background: var(--primary);   color: #fff; }
+        .ui-button-secondary { background: #f1f5f9;          color: var(--text); border-color: var(--border); }
+        .ui-button-success   { background: #10b981;          color: #fff; }
+        .ui-button-danger    { background: var(--danger);    color: #fff; }
+
+        /* ---- RESPONSIVE TABLE (portal pattern) ---- */
+        @media screen and (max-width: 767px) {
+            .responsive-table thead { display: none; }
+            .responsive-table td:first-child {
+                background: #f3f4f6;
+                font-weight: 700;
+                color: #1f2937;
+            }
+            .responsive-table tbody,
+            .responsive-table tr,
+            .responsive-table td {
+                display: block;
+                width: 100%;
+            }
+            .responsive-table tr {
+                margin-bottom: 0.75rem;
+                border: 1px solid var(--border);
+                border-radius: 0.6rem;
+                overflow: hidden;
+                background: #fff;
+                box-shadow: 0 1px 2px rgba(15,23,42,0.05);
+            }
+            .responsive-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                text-align: right;
+                border-bottom: 1px solid #f1f5f9;
+                font-size: 0.82rem;
+            }
+            .responsive-table td:last-child { border-bottom: none; }
+            .responsive-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                text-align: left;
+                margin-right: 1rem;
+                text-transform: uppercase;
+                font-size: 0.65rem;
+                letter-spacing: 0.06em;
+                color: var(--text-soft);
+            }
+        }
+
+        /* ---- EXAM TIMER / SIDEBAR OVERRIDES ---- */
+        #sidebar a { text-decoration: none; }
+        #sidebar .nav-link { cursor: pointer; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+    <div class="app-shell">
+
+        <!-- ====== SIDEBAR ====== -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-brand flex items-center gap-3 border-b border-slate-700 p-4">
+                <a href="{% if user.profile.role == 'instructor' %}{% url 'instructor_dashboard' %}{% else %}{% url 'student_dashboard' %}{% endif %}"
+                   class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400">
+                        <i data-lucide="graduation-cap" class="h-5 w-5"></i>
+                    </div>
+                    <div class="brand-label min-w-0">
+                        <h1 class="text-sm font-bold tracking-tight text-white">Exam LMS</h1>
+                        <p class="text-[11px] text-slate-400">Learning dashboard</p>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="flex flex-col gap-1 p-3">
+                {% if user.is_authenticated %}
+                <a href="{% if user.profile.role == 'instructor' %}{% url 'instructor_dashboard' %}{% else %}{% url 'student_dashboard' %}{% endif %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'student_dashboard,instructor_dashboard' %}is-active{% endif %}">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+
+                {% if user.profile.role == 'student' %}
+                <a href="{% url 'student_subjects' %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'student_subjects,manage_subject' %}is-active{% endif %}">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    <span class="nav-label">Subjects</span>
+                </a>
+                <a href="{% url 'available_exams' %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'available_exams,already_taken,start_exam' %}is-active{% endif %}">
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                    <span class="nav-label">Exams</span>
+                </a>
+                <a href="{% url 'my_results' %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'my_results,result' %}is-active{% endif %}">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <span class="nav-label">Results</span>
+                </a>
+
+                {% elif user.profile.role == 'instructor' %}
+                <a href="{% url 'subjects' %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'subjects,manage_subject,create_subject' %}is-active{% endif %}">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    <span class="nav-label">Subjects</span>
+                </a>
+                <a href="{% url 'question_bank' %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'question_bank,add_question,edit_question' %}is-active{% endif %}">
+                    <i data-lucide="library-big" class="w-4 h-4"></i>
+                    <span class="nav-label">Questions</span>
+                </a>
+                <a href="{% url 'create_exam' %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'create_exam,manage_exam' %}is-active{% endif %}">
+                    <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                    <span class="nav-label">Exams</span>
+                </a>
+                <a href="{% url 'assign_students' %}"
+                   class="nav-link {% if request.resolver_match.url_name == 'assign_students' %}is-active{% endif %}">
+                    <i data-lucide="users-round" class="w-4 h-4"></i>
+                    <span class="nav-label">Students</span>
+                </a>
+                <a href="{% url 'instructor_results' %}"
+                   class="nav-link {% if request.resolver_match.url_name in 'instructor_results,view_logs' %}is-active{% endif %}">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    <span class="nav-label">Results</span>
+                </a>
+                <a href="{% url 'analytics' %}"
+                   class="nav-link {% if request.resolver_match.url_name == 'analytics' %}is-active{% endif %}">
+                    <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                    <span class="nav-label">Analytics</span>
+                </a>
+                <a href="{% url 'archived_exams' %}"
+                   class="nav-link {% if request.resolver_match.url_name == 'archived_exams' %}is-active{% endif %}">
+                    <i data-lucide="archive" class="w-4 h-4"></i>
+                    <span class="nav-label">Archive</span>
+                </a>
+                {% endif %}
+                {% endif %}
+            </nav>
+
+            {% if user.is_authenticated %}
+            <div class="mt-auto border-t border-slate-700 p-3 space-y-1">
+                <a href="{% url 'profile' %}" class="nav-link text-slate-400">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    <span class="sidebar-footer-label">Profile</span>
+                </a>
+                <a href="{% url 'login' %}" class="nav-link !text-red-400 hover:!bg-red-900/20">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span class="sidebar-footer-label">Logout</span>
+                </a>
+            </div>
+            {% endif %}
+        </aside>
+
+        <!-- ====== MAIN CONTENT ====== -->
+        <div class="main-content">
+
+            <!-- Header with inline toggle -->
+            <header class="content-header">
+                <button class="toggle-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i data-lucide="panel-left-open" class="w-4 h-4" id="toggleIcon"></i>
+                </button>
+
+                <div class="flex-1 flex flex-col">
+                    <p class="text-label hidden sm:block">LMS Workspace</p>
+                    <h2 class="text-sm font-semibold text-slate-900 sm:text-base">
+                        {% block page_heading %}Exam System Dashboard{% endblock %}
+                    </h2>
+                </div>
+
+                {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100">
+                    <div class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span class="hidden sm:inline">{{ user.username }}</span>
+                </a>
+                {% else %}
+                <span class="text-xs font-medium text-slate-400 hidden sm:inline">Secure LMS</span>
+                {% endif %}
+            </header>
+
+            <main class="flex-1 p-4 md:p-6">
+                {% if messages %}
+                <div class="mb-3 space-y-3">
+                    {% for message in messages %}
+                    <div class="message {% if message.tags == 'success' %}message-success{% elif message.tags == 'error' %}message-error{% else %}message-default{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="w-full">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ====== MOBILE BOTTOM NAV ====== -->
+    <nav class="mobile-nav">
+        {% if user.is_authenticated %}
+            {% if user.profile.role == 'student' %}
+            <a href="{% url 'student_dashboard' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'student_dashboard,instructor_dashboard' %}active{% endif %}">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                <span>Home</span>
+            </a>
+            <a href="{% url 'student_subjects' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'student_subjects,manage_subject' %}active{% endif %}">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+                <span>Subjects</span>
+            </a>
+            <a href="{% url 'available_exams' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'available_exams,already_taken,start_exam' %}active{% endif %}">
+                <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                <span>Exams</span>
+            </a>
+            <a href="{% url 'my_results' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'my_results,result' %}active{% endif %}">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                <span>Results</span>
+            </a>
+            {% elif user.profile.role == 'instructor' %}
+            <a href="{% url 'instructor_dashboard' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'instructor_dashboard' %}active{% endif %}">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                <span>Home</span>
+            </a>
+            <a href="{% url 'subjects' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'subjects,manage_subject,create_subject' %}active{% endif %}">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+                <span>Subjects</span>
+            </a>
+            <a href="{% url 'create_exam' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'create_exam,manage_exam' %}active{% endif %}">
+                <i data-lucide="file-plus-2" class="w-5 h-5"></i>
+                <span>Create</span>
+            </a>
+            <a href="{% url 'instructor_results' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'instructor_results' %}active{% endif %}">
+                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                <span>Results</span>
+            </a>
+            {% endif %}
+        {% endif %}
+    </nav>
+
+    <!-- ====== CONFIRM MODAL ====== -->
+    <div id="confirmModal" class="confirm-modal" hidden aria-hidden="true">
+        <div class="confirm-modal__backdrop" data-confirm-close></div>
+        <div class="confirm-modal__dialog" role="dialog" aria-modal="true"
+             aria-labelledby="confirmModalTitle" aria-describedby="confirmModalBody">
+            <h2 id="confirmModalTitle" class="confirm-modal__title">Confirm Action</h2>
+            <p id="confirmModalBody" class="confirm-modal__body">Are you sure?</p>
+            <div class="confirm-modal__actions">
+                <button id="confirmModalCancel"   class="ui-button ui-button-secondary">Cancel</button>
+                <button id="confirmModalConfirm"  class="ui-button ui-button-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        /* ---------- ICON SYNC ---------- */
+        const sidebar  = document.getElementById('sidebar');
+        const toggle   = document.getElementById('sidebarToggle');
+        const icon     = document.getElementById('toggleIcon');
+
+        function syncIcon(collapsed) {
+            if (!icon) return;
+            icon.setAttribute('data-lucide', collapsed ? 'panel-left-open' : 'panel-left-close');
+            lucide.createIcons();
+        }
+
+        /* ---------- SIDEBAR TOGGLE ---------- */
+        // Restore sidebar state so it persists across page navigations
+        if (sidebar && sessionStorage.getItem('sidebar') === 'mini') {
+            sidebar.classList.add('sidebar-mini');
+            syncIcon(true);
+        }
+        if (toggle && sidebar) {
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-mini');
+                sessionStorage.setItem('sidebar', sidebar.classList.contains('sidebar-mini') ? 'mini' : 'full');
+                syncIcon(sidebar.classList.contains('sidebar-mini'));
+            });
+        }
+
+        /* close sidebar drawer on mobile (collapsed = full hide, not mini) */
+        /* On mobile (<1024) sidebar is display:none, so toggle keyframes are handled
+           via CSS: sidebar disappears — mobile-nav provides all navigation */
+
+        lucide.createIcons();
+
+        /* ---------- CONFIRM MODAL ---------- */
+        const confirmModal   = document.getElementById('confirmModal');
+        const confirmTitle   = document.getElementById('confirmModalTitle');
+        const confirmBody    = document.getElementById('confirmModalBody');
+        const confirmConfirm = document.getElementById('confirmModalConfirm');
+        const confirmCancel  = document.getElementById('confirmModalCancel');
+        let pendingAction    = null;
+
+        function closeModal() {
+            if (!confirmModal) return;
+            confirmModal.hidden = true;
+            confirmModal.setAttribute('aria-hidden','true');
+            document.body.classList.remove('overflow-hidden');
+            pendingAction = null;
+        }
+
+        function openModal(opts) {
+            if (!confirmModal) return;
+            confirmTitle.textContent  = opts.title  || 'Confirm Action';
+            confirmBody.textContent   = opts.message || 'Are you sure?';
+            confirmConfirm.textContent = opts.confirmLabel || 'Confirm';
+            confirmConfirm.className   = 'ui-button ui-button-danger';
+            if (opts.confirmColor === '#2563eb' || opts.confirmColor === '#3b82f6') {
+                confirmConfirm.className = 'ui-button ui-button-primary';
+            } else if (opts.confirmColor === '#f1f5f9') {
+                confirmConfirm.className = 'ui-button ui-button-secondary';
+            } else if (opts.confirmColor === '#10b981') {
+                confirmConfirm.className = 'ui-button ui-button-success';
+            }
+            confirmModal.hidden = false;
+            confirmModal.setAttribute('aria-hidden','false');
+            document.body.classList.add('overflow-hidden');
+            pendingAction = typeof opts.onConfirm === 'function' ? opts.onConfirm : null;
+        }
+
+        if (confirmConfirm) confirmConfirm.addEventListener('click', () => { closeModal(); if (pendingAction) pendingAction(); });
+        if (confirmCancel)  confirmCancel.addEventListener('click',  closeModal);
+        if (confirmModal)   confirmModal.addEventListener('click', e => { if (e.target.closest('[data-confirm-close]')) closeModal(); });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && confirmModal && !confirmModal.hidden) closeModal();
+        });
+
+        document.addEventListener('click', e => {
+            const t = e.target.closest('[data-confirm]');
+            if (!t) return;
+            e.preventDefault();
+            openModal({
+                title:       t.getAttribute('data-confirm-title'),
+                message:     t.getAttribute('data-confirm-message'),
+                confirmLabel:t.getAttribute('data-confirm-label'),
+                confirmColor:t.getAttribute('data-confirm-color'),
+                onConfirm: () => {
+                    const href = t.getAttribute('href');
+                    if (href) { window.location.href = href; return; }
+                    const formId = t.getAttribute('data-confirm-form');
+                    if (formId) { const f = document.getElementById(formId); if (f) f.submit(); }
+                }
+            });
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

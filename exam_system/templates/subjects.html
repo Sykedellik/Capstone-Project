@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Subjects{% endblock %}
+{% block page_heading %}Subjects{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ─────────────── HEADER ──────────────────────────────── -->
+    <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-label mb-1">Course Organisation</p>
+            <h1 class="text-h1">Subjects</h1>
+            <p class="text-body mt-1">
+                {{ subjects|length }} subject{{ subjects|length|pluralize }} &middot; {{ total_exams }} exam{{ total_exams|pluralize }} &middot; {{ total_students }} student{{ total_students|pluralize }}
+            </p>
+        </div>
+        <a href="{% url 'create_subject' %}" class="btn-primary">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            New Subject
+        </a>
+    </section>
+
+    <!-- ─────────────── STATS STRIP ──────────────────────────── -->
+    {% if subjects %}
+    <section class="grid grid-cols-3 gap-3">
+        <div class="card" style="border-left: 4px solid #3b82f6;">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                    <i data-lucide="book-open" class="h-4 w-4 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-label">Subjects</p>
+                    <p class="text-lg font-bold text-slate-900">{{ subjects|length }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #8b5cf6;">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-50">
+                    <i data-lucide="file-text" class="h-4 w-4 text-violet-600"></i>
+                </div>
+                <div>
+                    <p class="text-label">Exams</p>
+                    <p class="text-lg font-bold text-slate-900">{{ total_exams }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #f59e0b;">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50">
+                    <i data-lucide="users" class="h-4 w-4 text-amber-600"></i>
+                </div>
+                <div>
+                    <p class="text-label">Students</p>
+                    <p class="text-lg font-bold text-slate-900">{{ total_students }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ─────────────── SUBJECT CARDS ────────────────────────── -->
+    {% if subjects %}
+    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {% for subject in subjects %}
+        <article class="card flex flex-col">
+            <div class="flex-1">
+                <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+                    <h2 class="text-base font-semibold text-slate-900 leading-snug">{{ subject.name }}</h2>
+                    {% if subject.code %}
+                    <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 shrink-0">
+                        {{ subject.code }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center gap-4 text-xs text-slate-500 mt-3">
+                    <span class="inline-flex items-center gap-1">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-500"></i>
+                        {{ subject.exam_count|default:0 }} exam{{ subject.exam_count|default:0|pluralize }}
+                    </span>
+                    <span class="inline-flex items-center gap-1">
+                        <i data-lucide="users" class="w-3.5 h-3.5 text-amber-500"></i>
+                        {{ subject.enrolled_count|default:0 }} student{{ subject.enrolled_count|default:0|pluralize }}
+                    </span>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+    {% else %}
+    <!-- ─────────────── EMPTY STATE ──────────────────────────── -->
+    <div class="card text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
+            <i data-lucide="book-open" class="h-7 w-7 text-blue-500"></i>
+        </div>
+        <h2 class="text-h2">No subjects yet</h2>
+        <p class="text-body mt-2 max-w-md mx-auto">
+            Subjects are the foundation of your exam library. Create your first subject to start building exams and adding questions.
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

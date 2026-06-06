@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Integrity Logs - {{ student.username }}{% endblock %}
+{% block page_heading %}Integrity Logs{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-label">Student Violations</p>
+            <h1 class="text-h1">{{ student.username }}</h1>
+            <p class="text-body mt-2">Security audit for examination sessions.</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'instructor_results' %}" class="btn-secondary">
+                <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                <span>Back to Results</span>
+            </a>
+            <a href="{% url 'export_student_logs_pdf' student.id %}{% if selected_exam_id %}?exam={{ selected_exam_id }}{% endif %}" class="btn-primary">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                <span>Export PDF</span>
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div class="rounded-md border px-4 py-2 {% if message.tags == 'success' %}border-slate-300 bg-slate-50 text-slate-700{% else %}border-red-200 bg-red-50 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if exam_result %}
+    <div class="card">
+        <h2 class="text-label mb-3">Exam Summary</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-md bg-slate-50 p-4">
+                <p class="text-label mb-1">Exam</p>
+                <p class="font-semibold text-slate-900">{{ exam_result.exam.title }}</p>
+            </div>
+            <div class="rounded-md bg-slate-50 p-4">
+                <p class="text-label mb-1">Score</p>
+                <p class="font-semibold text-slate-900">{{ exam_result.score|floatformat:0 }}/{{ exam_result.exam.total_questions }}</p>
+            </div>
+            <div class="rounded-md bg-slate-50 p-4">
+                <p class="text-label mb-1">Start Time</p>
+                <p class="font-semibold text-slate-900">{{ exam_result.start_time|date:"M d, Y g:i A" }}</p>
+            </div>
+            <div class="rounded-md bg-slate-50 p-4">
+                <p class="text-label mb-1">End Time</p>
+                <p class="font-semibold text-slate-900">{% if exam_result.end_time %}{{ exam_result.end_time|date:"M d, Y g:i A" }}{% else %}In Progress{% endif %}</p>
+            </div>
+        </div>
+        
+        <div class="mt-4 flex flex-wrap items-center gap-4">
+            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700">Status: {{ exam_result.get_status_display }}</span>
+            {% if exam_result.integrity_score is not None %}
+            <span class="inline-flex rounded-full px-3 py-1.5 text-sm font-bold {% if exam_result.risk_level == 'CRITICAL' %}bg-red-100 text-red-700{% elif exam_result.risk_level == 'HIGH' %}bg-orange-100 text-orange-700{% elif exam_result.risk_level == 'MEDIUM' %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ exam_result.integrity_score }}% {{ exam_result.risk_level }}
+            </span>
+            {% endif %}
+            <span class="rounded-full bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700">Violations: {{ violation_count }}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if logs %}
+    <div class="card">
+        <div class="mb-4">
+            <p class="text-label">Event Log</p>
+            <p class="text-sm text-slate-500">All recorded integrity violations with timestamps.</p>
+        </div>
+        <div class="space-y-3">
+            {% for log in logs %}
+            <div class="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <div class="flex items-center gap-3">
+                    <span class="font-medium text-slate-900">{{ log.get_event_type_display }}</span>
+                    <span class="text-sm text-slate-500">{{ log.timestamp|date:"M d, Y g:i A" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="card text-center">
+        <p class="text-slate-600">No integrity violations recorded for this student.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

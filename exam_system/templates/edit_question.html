@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Question{% endblock %}
+{% block page_heading %}Question Editor{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <section class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-label mb-2">Question Editor</p>
+            <h1 class="text-h1">Edit Question</h1>
+            <p class="text-body mt-2 max-w-3xl">Update the question text, options, or correct answer.</p>
+        </div>
+        <a href="{% url 'question_bank' %}" class="btn-secondary">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Back to Question Bank</span>
+        </a>
+    </section>
+
+        <div class="form-shell ui-form-wrap">
+            <div class="mb-4">
+            <p class="text-label mb-2">Question Details</p>
+            <h2 class="text-h2">Update the Question</h2>
+            <p class="text-body mt-1">Modify the prompt, multiple-choice options, and correct answer.</p>
+        </div>
+
+            <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="field-label">Question Text</label>
+                <textarea name="question_text" required class="field-textarea min-h-[130px]" placeholder="Enter the exam question...">{{ question.question_text }}</textarea>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="field-label">Option A</label>
+                    <input type="text" name="option_a" value="{{ question.option_a|default_if_none:'' }}" required class="field-input">
+                </div>
+                <div>
+                    <label class="field-label">Option B</label>
+                    <input type="text" name="option_b" value="{{ question.option_b|default_if_none:'' }}" required class="field-input">
+                </div>
+                <div>
+                    <label class="field-label">Option C</label>
+                    <input type="text" name="option_c" value="{{ question.option_c|default_if_none:'' }}" required class="field-input">
+                </div>
+                <div>
+                    <label class="field-label">Option D</label>
+                    <input type="text" name="option_d" value="{{ question.option_d|default_if_none:'' }}" required class="field-input">
+                </div>
+            </div>
+
+            <div>
+                <label class="field-label">Correct Answer</label>
+                <select name="correct_answer" required class="field-select max-w-xs">
+                    <option value="A" {% if question.correct_answer == 'A' %}selected{% endif %}>A</option>
+                    <option value="B" {% if question.correct_answer == 'B' %}selected{% endif %}>B</option>
+                    <option value="C" {% if question.correct_answer == 'C' %}selected{% endif %}>C</option>
+                    <option value="D" {% if question.correct_answer == 'D' %}selected{% endif %}>D</option>
+                </select>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="save" class="h-4 w-4"></i>
+                    <span>Save Changes</span>
+                </button>
+                <a href="{% url 'question_bank' %}" class="btn-secondary">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                    <span>Cancel</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Questions &ndash; {{ exam.title }}{% endblock %}
+{% block page_heading %}Add Questions{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ── HEADER ────────────────── -->
+    <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-label mb-1">Exam Builder</p>
+            <h1 class="text-h1">
+                Add Questions to
+                {% if exam.subject.code %}<span class="text-blue-600">{{ exam.subject.code }}</span> &ndash; {% endif %}
+                {{ exam.title }}
+            </h1>
+            <p class="text-body mt-1">
+                Select questions from your question bank to assign to this exam.
+                Only questions from <strong>{{ exam.subject.name }}</strong> are shown.
+            </p>
+        </div>
+        <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            Back to Exam
+        </a>
+    </section>
+
+    <!-- ── SUBJECT FILTER ────────── -->
+    <section class="rounded-md border border-slate-200 bg-white p-4">
+        <form method="get" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <input type="hidden" name="exam_id" value="{{ exam.id }}">
+            <div>
+                <label for="subject_id" class="field-label">Filter by Subject</label>
+                <select id="subject_id" name="subject_id" onchange="this.form.submit()" class="field-select w-56">
+                    <option value="">All subjects (mine)</option>
+                    {% for s in subjects %}
+                        <option value="{{ s.id }}" {% if s.id|stringformat:'s' == selected_subject_id|stringformat:'s' %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <p class="text-sm text-slate-500">
+                {{ questions|length }} unassigned question{{ questions|length|pluralize }} available.
+            </p>
+        </form>
+    </section>
+
+    <!-- ── QUESTION GRID ─────────── -->
+    {% if questions %}
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <input type="hidden" name="subject_id" value="{{ selected_subject_id }}">
+
+        <section class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {% for q in questions %}
+            <label class="rounded-md border border-slate-200 bg-white p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors">
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" name="questions" value="{{ q.id }}" class="question-cb mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <span class="text-xs font-medium text-slate-500">{{ q.subject.code }} &middot; Q</span>
+                        <p class="font-semibold text-slate-900 leading-snug">{{ q.question_text }}</p>
+                        <p class="mt-1 text-xs text-green-700 font-medium">Answer: {{ q.correct_answer }}</p>
+                    </div>
+                </div>
+            </label>
+            {% endfor %}
+        </section>
+
+        <div class="sticky bottom-0 flex items-center justify-between gap-4 rounded-md border border-slate-200 bg-white px-5 py-3 shadow-sm">
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <input type="checkbox" id="select-all" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                <span>Select all</span>
+            </label>
+            <div class="flex items-center gap-3">
+                <p class="text-sm text-slate-600">
+                    <span id="selected-count">0</span> selected
+                </p>
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Add <span id="btn-count">0</span> to Exam
+                </button>
+            </div>
+        </div>
+    </form>
+    {% else %}
+    <!-- ── EMPTY STATE ────────────── -->
+    <div class="card text-center">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+            <i data-lucide="check-check" class="h-6 w-6 text-slate-400"></i>
+        </div>
+        <h2 class="text-h2">All bank questions already assigned</h2>
+        <p class="text-body mt-2 max-w-md mx-auto">
+            Every question in <strong>{{ exam.subject.name }}</strong> is already part of this exam.
+        </p>
+        <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary mt-5">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            Back to Exam
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    var allCbs   = document.querySelectorAll('input[name="questions"]');
+    var masterCb = document.getElementById('select-all');
+    var countEl  = document.getElementById('selected-count');
+    var btnEl    = document.getElementById('btn-count');
+
+    function update() {
+        var n = 0;
+        allCbs.forEach(function(cb) { if (cb.checked) n++; });
+        if (countEl) countEl.textContent = n;
+        if (btnEl)   btnEl.textContent   = n;
+        if (masterCb) masterCb.checked  = n === allCbs.length && allCbs.length > 0;
+        if (masterCb) masterCb.indeterminate = n > 0 && n < allCbs.length;
+    }
+
+    allCbs.forEach(function(cb) { cb.addEventListener('change', update); });
+
+    if (masterCb) {
+        masterCb.addEventListener('change', function() {
+            allCbs.forEach(function(cb) { cb.checked = masterCb.checked; });
+            update();
+        });
+    }
+
+    update();
+    lucide.createIcons();
+})();
+</script>
+{% endblock %}

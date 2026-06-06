@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Exams{% endblock %}
+{% block page_heading %}Exam Catalog{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <section class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-label mb-2">Assessment Catalog</p>
+            <h1 class="text-h1">Available Exams</h1>
+            <p class="text-body mt-2 max-w-3xl">
+                Browse and launch the exams assigned to you. Each exam includes subject, duration, and availability details.
+            </p>
+        </div>
+        <a href="{% url 'my_results' %}" class="btn-secondary">
+            <i data-lucide="file-text" class="h-4 w-4"></i>
+            <span>My Results</span>
+        </a>
+    </section>
+
+    {% if available or taken %}
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-label">Available</p>
+                    <p class="text-2xl font-bold text-blue-600">{{ total_available }}</p>
+                </div>
+                <div class="rounded-md bg-slate-50 p-3">
+                    <i data-lucide="clipboard-list" class="h-5 w-5 text-slate-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-label">Completed</p>
+                    <p class="text-2xl font-bold text-slate-900">{{ total_taken }}</p>
+                </div>
+                <div class="rounded-md bg-slate-50 p-3">
+                    <i data-lucide="check-circle" class="h-5 w-5 text-slate-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if available %}
+    <section class="ui-card">
+        <div class="mb-4">
+            <p class="text-label mb-2">Active Exams</p>
+            <h2 class="text-h2">Ready for Assessment</h2>
+            <p class="text-body mt-1">Select an exam below to begin.</p>
+        </div>
+
+        <div class="ui-grid-exams">
+            {% for item in available %}
+            <article class="exam-card">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-semibold text-slate-900">{{ item.exam.title }}</h3>
+                                <span class="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                                    Available
+                                </span>
+                            </div>
+                            <div class="text-sm text-slate-500">
+                                <p>Subject: <span class="font-medium text-slate-700">{{ item.subject.name }}</span></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="rounded-md bg-slate-50 px-3 py-2">
+                                <p class="text-label mb-1">Duration</p>
+                                <p class="text-lg font-bold text-slate-900">{% if item.exam.duration_enabled %}{{ item.exam.duration|default_if_none:"—" }} minute{{ item.exam.duration|pluralize }}{% else %}Unlimited{% endif %}</p>
+                            </div>
+                            <div class="rounded-md bg-slate-50 px-3 py-2">
+                                <p class="text-label mb-1">Questions</p>
+                                <p class="text-lg font-bold text-slate-900">{{ item.exam.total_questions }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+<a href="{% url 'exam_guidelines' item.exam.id %}" class="btn-primary">
+                             <i data-lucide="play-circle" class="h-4 w-4"></i>
+                             <span>Start Exam</span>
+                         </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if taken %}
+    <section class="ui-card">
+        <div class="mb-4">
+            <p class="text-label mb-2">Completed Exams</p>
+            <h2 class="text-h2">Your Assessment History</h2>
+            <p class="text-body mt-1">Review your completed exams and results.</p>
+        </div>
+
+        <div class="ui-grid-exams">
+            {% for item in taken %}
+            <article class="exam-card">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-semibold text-slate-900">{{ item.exam.title }}</h3>
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                    Completed
+                                </span>
+                            </div>
+                            <div class="text-sm text-slate-500">
+                                <p>Subject: <span class="font-medium text-slate-700">{{ item.subject.name }}</span></p>
+                            </div>
+                        </div>
+
+                        <div class="rounded-md bg-slate-50 px-3 py-2">
+                            <p class="text-label mb-1">Duration</p>
+                            <p class="text-lg font-bold text-slate-900">{{ item.exam.duration }} minute{{ item.exam.duration|pluralize }}</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not available and not taken %}
+    <div class="card text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-md bg-slate-100 text-slate-400">
+            <i data-lucide="clipboard-list" class="h-7 w-7"></i>
+        </div>
+        <h2 class="text-h2">No exams available</h2>
+        <p class="text-body mt-2">Your instructor hasn't assigned any exams to you yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

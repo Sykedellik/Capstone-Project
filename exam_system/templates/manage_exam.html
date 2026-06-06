@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }}{% endblock %}
+{% block page_heading %}Exam Management{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ─────────────── HEADER ──────────────────────────────── -->
+    <section class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-label mb-1">Exam Overview</p>
+            <h1 class="text-h1">{{ exam.title }}</h1>
+            <p class="text-body mt-2 max-w-3xl">
+                Subject: <span class="font-semibold text-slate-900">{{ exam.subject.name }}</span> &middot;
+                Duration: <span class="font-semibold text-slate-900">{{ exam.duration }} min{{ exam.duration|pluralize }}</span> &middot;
+                Questions: <span class="font-semibold text-slate-900">{{ questions.count }}/{{ exam.total_questions }}</span>
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'instructor_dashboard' %}" class="btn-secondary">
+                <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                <span>Back to Dashboard</span>
+            </a>
+            <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary" title="Refresh">
+                <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- ─────────────────── EXAM SETTINGS ──────────────────── -->
+    <section class="rounded-md border border-slate-200 bg-white p-4">
+        <div class="mb-4">
+            <p class="text-label mb-2">Configuration</p>
+            <h2 class="text-h2">Exam Settings</h2>
+            <p class="text-body mt-1">Adjust the exam title, subject, description, duration, question count, and availability windows.</p>
+        </div>
+
+        <form method="POST" action="{% url 'update_exam' exam.id %}" class="space-y-4">
+            {% csrf_token %}
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="field-label">Exam Title</label>
+                    <input type="text" name="title" value="{{ exam.title }}" required class="field-input">
+                </div>
+                <div>
+                    <label class="field-label">Subject</label>
+                    <select name="subject" required class="field-select">
+                        {% for s in subjects %}
+                        <option value="{{ s.id }}" {% if s.id == exam.subject.id %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="field-label">Description</label>
+                <textarea name="description" rows="2" class="field-textarea" placeholder="Optional exam notes or instructions...">{{ exam.description|default:"" }}</textarea>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="field-label">Duration (Minutes)</label>
+                    <input type="number" name="duration" id="duration" value="{{ exam.duration }}" min="1" {% if exam.duration_enabled %}required{% endif %} class="field-input">
+                </div>
+                <div>
+                    <label class="field-label">Questions per Student</label>
+                    <input type="number" name="total_questions" value="{{ exam.total_questions }}" min="1" required class="field-input">
+                </div>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" name="duration_enabled" id="duration_enabled" {% if exam.duration_enabled %}checked{% endif %} class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="toggleDurationDisabled(this)">
+                    <div>
+                        <label for="duration_enabled" class="block text-sm font-semibold text-slate-900">
+                            Enable Time Limit
+                        </label>
+                        <p class="mt-1 text-sm text-slate-600">
+                            When checked, students must submit within the set duration. Uncheck to allow unlimited time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="field-label">Available From</label>
+                    <input type="datetime-local" name="available_from" value="{% if exam.available_from %}{{ exam.available_from|date:'Y-m-d H:i' }}{% endif %}" step="60" class="field-input">
+                    <p class="mt-1 text-xs text-slate-500">Leave blank to open immediately.</p>
+                </div>
+                <div>
+                    <label class="field-label">Available Until (Deadline)</label>
+                    <input type="datetime-local" name="available_until" value="{% if exam.available_until %}{{ exam.available_until|date:'Y-m-d H:i' }}{% endif %}" step="60" class="field-input">
+                    <p class="mt-1 text-xs text-slate-500">Leave blank for no deadline. Students cannot start the exam past this time.</p>
+                </div>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <input
+                        id="randomize"
+                        type="checkbox"
+                        name="randomize"
+                        {% if exam.randomize_questions %}checked{% endif %}
+                        class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    >
+                    <div>
+                        <label for="randomize" class="block text-sm font-semibold text-slate-900">
+                            Enable Question Randomization
+                        </label>
+                        <p class="mt-1 text-sm text-slate-600">
+                            Students will receive the assigned questions in a different order for stronger exam integrity.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-end gap-3">
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="save" class="h-4 w-4"></i>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- ─────────────────── ASSIGNED QUESTIONS ─────────────── -->
+    <section class="rounded-md border border-slate-200 bg-white p-4">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-label mb-2">Exam Questions</p>
+                <h2 class="text-h2">Assigned Questions</h2>
+                <p class="text-body mt-1">Manage the questions assigned to this exam.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
+                    {{ questions|length }} / {{ exam.total_questions }} assigned
+                </span>
+                <a href="{% url 'add_questions_to_exam' exam.id %}" class="btn-primary">
+                    <i data-lucide="library-big" class="h-4 w-4"></i>
+                    Pick from Bank
+                </a>
+            </div>
+        </div>
+
+        {% if questions %}
+        <div class="space-y-3">
+            {% for q in questions %}
+            <article class="rounded-md border border-slate-200 p-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-slate-400 mb-1">Q{{ forloop.counter }}</p>
+                        <p class="font-semibold text-slate-900">{{ q.question_text }}</p>
+                        <p class="mt-1 text-sm text-slate-500">
+                            Answer: <span class="font-medium text-slate-700">{{ q.correct_answer }}</span>
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 shrink-0">
+                        <a href="{% url 'edit_question' q.id %}" class="btn-secondary">
+                            <i data-lucide="pencil" class="h-4 w-4"></i>
+                            <span>Edit</span>
+                        </a>
+                        <a href="{% url 'remove_question_from_exam' exam.id q.id %}"
+                           class="btn-danger"
+                           data-confirm
+                           data-confirm-title="Remove Question"
+                           data-confirm-message="Are you sure you want to remove this question from the exam?"
+                           data-confirm-label="Remove"
+                           data-confirm-color="#dc2626">
+                            <i data-lucide="trash-2" class="h-4 w-4"></i>
+                            <span>Remove</span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="rounded-md border border-dashed border-slate-300 p-6 text-center text-slate-500">
+            No questions assigned yet. Use &quot;Pick from Bank&quot; above or create a new question.
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+
+<script>
+function toggleDurationDisabled(checkbox) {
+    var input = document.getElementById('duration');
+    if (!input) return;
+    if (checkbox.checked) {
+        input.disabled = false;
+        input.required = true;
+    } else {
+        input.disabled = true;
+        input.required = false;
+        input.value = '';
+    }
+}
+
+lucide.createIcons();
+</script>
+{% endblock %}

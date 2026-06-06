@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit {{ subject.name }}{% endblock %}
+{% block page_heading %}Edit Subject{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <section class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-label mb-2">Subject Management</p>
+            <h1 class="text-h1">Edit Subject</h1>
+            <p class="text-body mt-2">Update the subject details.</p>
+        </div>
+        <a href="{% url 'manage_subject' subject.id %}" class="btn-secondary">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Back to Subject</span>
+        </a>
+    </section>
+
+    <div class="card max-w-2xl">
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="field-label">Subject Name</label>
+                <input type="text" name="name" value="{{ subject.name }}" required class="field-input">
+            </div>
+
+            <div>
+                <label class="field-label">Subject Code (Optional)</label>
+                <input type="text" name="code" value="{{ subject.code|default:'' }}" class="field-input" placeholder="e.g. CS101">
+            </div>
+
+            <div>
+                <label class="field-label">Description (Optional)</label>
+                <textarea name="description" class="field-textarea min-h-[120px]" placeholder="Describe this subject...">{{ subject.description|default:'' }}</textarea>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="save" class="h-4 w-4"></i>
+                    <span>Save Changes</span>
+                </button>
+                <a href="{% url 'manage_subject' subject.id %}" class="btn-secondary">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                    <span>Cancel</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

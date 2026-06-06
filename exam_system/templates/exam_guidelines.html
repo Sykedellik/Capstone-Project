@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - Exam Guidelines{% endblock %}
+{% block page_heading %}Exam Guidelines{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <div class="mb-6">
+            <h2 class="text-h2 mb-2">{{ exam.title }}</h2>
+            <p class="text-body">Please read the following guidelines before starting your exam.</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                        <i data-lucide="shield" class="h-4 w-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900">Tab/Window Switching</h3>
+                        <p class="text-sm text-slate-600">Switching to another tab or window is automatically detected and logged.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600">
+                        <i data-lucide="copy" class="h-4 w-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900">Copy Prevention</h3>
+                        <p class="text-sm text-slate-600">Copying question content (Ctrl+C) is blocked and logged.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                        <i data-lucide="mouse-pointer" class="h-4 w-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900">Right-Click Disabled</h3>
+                        <p class="text-sm text-slate-600">Right-clicking is disabled during the exam session.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-600">
+                        <i data-lucide="save" class="h-4 w-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900">Auto-Save</h3>
+                        <p class="text-sm text-slate-600">Your answers are saved automatically &mdash; no need to worry about losing progress.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 border-t border-slate-200 pt-6">
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <label class="flex items-start gap-3">
+                    <input type="checkbox" name="acknowledge" required class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm text-slate-700">
+                        I have read and understand the exam guidelines. I acknowledge that all examination activity is monitored for academic integrity purposes.
+                    </span>
+                </label>
+
+                <div class="flex gap-3">
+                    <a href="{% url 'available_exams' %}" class="btn-secondary">
+                        <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                        <span>Back to Exams</span>
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i data-lucide="play-circle" class="h-4 w-4"></i>
+                        <span>Start Exam</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

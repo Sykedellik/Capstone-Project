@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Exam Unavailable{% endblock %}
+{% block page_heading %}Exam Unavailable{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+    <div class="card text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-4xl text-red-500">
+            &#128274;
+        </div>
+        <h1 class="text-h1">Exam Window Has Closed</h1>
+        <p class="text-body mt-2">
+            <strong>{{ exam.title }}</strong> is no longer accessible. The deadline was
+            {% if exam.available_until %}
+                {{ exam.available_until|date:"M d, Y g:i A" }}.
+            {% else %}
+                reached.
+            {% endif %}
+        </p>
+
+        {% if exam.available_from %}
+        <p class="text-sm text-slate-500 mt-1">
+            This exam was only available from {{ exam.available_from|date:"M d, Y g:i A" }}
+            {% if exam.available_until %}to {{ exam.available_until|date:"M d, Y g:i A" }}{% endif %}.
+        </p>
+        {% endif %}
+
+        <div class="mt-6">
+            <a href="{% url 'available_exams' %}" class="btn-primary">
+                <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                <span>Back to Exams</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

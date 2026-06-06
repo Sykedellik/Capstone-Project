@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+{% block page_heading %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ─────────────── HEADER ──────────────────────────────── -->
+    <section class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-label mb-2">Dashboard</p>
+            <h1 class="text-h1">Welcome back, {{ user.username }}</h1>
+            <p class="text-body mt-2 max-w-2xl">
+                Here's a snapshot of your academic activity. Monitor subject progress, start or resume exams, and review your results — all in one place.
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'available_exams' %}" class="btn-primary">
+                <i data-lucide="clipboard-list" class="h-4 w-4"></i>
+                <span>Available Exams</span>
+            </a>
+            <a href="{% url 'my_results' %}" class="btn-secondary">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                <span>My Results</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ─────────────── STATS STRIP ──────────────────────────── -->
+    {% if data %}
+    <section class="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <div class="card" style="border-left: 3px solid #3b82f6;">
+            <div class="flex items-start gap-3">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                    <i data-lucide="book-open" class="h-4 w-4 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400 mb-0.5">Subjects</p>
+                    <p class="text-lg font-bold text-slate-900 leading-none">{{ data|length }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 3px solid #10b981;">
+            <div class="flex items-start gap-3">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-50">
+                    <i data-lucide="clipboard-check" class="h-4 w-4 text-green-600"></i>
+                </div>
+                <div>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400 mb-0.5">Available Exams</p>
+                    <p class="text-lg font-bold text-slate-900 leading-none">{{ total_available }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 3px solid #f59e0b;">
+            <div class="flex items-start gap-3">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50">
+                    <i data-lucide="check-circle" class="h-4 w-4 text-amber-600"></i>
+                </div>
+                <div>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400 mb-0.5">Completed</p>
+                    <p class="text-lg font-bold text-slate-900 leading-none">{{ total_completed }}</p>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    {% endif %}
+
+    <!-- ─────────────── SUBJECT CARDS ────────────────────────── -->
+    {% if data %}
+    <section class="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        {% for item in data %}
+        <article class="card flex flex-col shadow-sm">
+            <!-- Subject header -->
+            <div class="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-sm font-semibold text-slate-900 leading-snug truncate">{{ item.subject.name }}</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ item.count }} exam{{ item.count|pluralize }}</p>
+                </div>
+                {% if item.subject.code %}
+                <span class="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 whitespace-nowrap border border-blue-100">
+                    {{ item.subject.code }}
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Exam list -->
+            {% if item.exams %}
+            <div class="flex flex-col gap-2.5 flex-1">
+                {% for e in item.exams %}
+                <div class="rounded-md border border-slate-200 bg-slate-50/60 p-3">
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm font-semibold text-slate-900 leading-snug truncate">{{ e.exam.title }}</h3>
+                        </div>
+                        <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold border {% if e.status|lower == 'completed' %}bg-slate-200 text-slate-700 border-slate-300{% elif e.status|lower == 'not available' %}bg-red-50 text-red-700 border-red-200{% elif e.status|lower == 'in progress' %}bg-blue-50 text-blue-700 border-blue-200{% else %}bg-slate-100 text-slate-600 border-slate-200{% endif %}">
+                            {{ e.status|title }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-[11px] text-slate-400 mb-2.5">
+                        <span class="inline-flex items-center gap-1">
+                            <i data-lucide="help-circle" class="w-3 h-3"></i>
+                            {{ e.exam.total_questions }} questions
+                        </span>
+                        <span class="inline-flex items-center gap-1">
+                            <i data-lucide="clock" class="w-3 h-3"></i>
+                            {% if e.exam.duration_enabled %}{{ e.exam.duration|default_if_none:"—" }} min{% else %}Unlimited{% endif %}
+                        </span>
+                        {% if e.progress >= 0 and e.progress < 100 %}
+                        <span class="inline-flex items-center gap-1 text-slate-500">
+                            {{ e.progress }}% answered
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex justify-end">
+                        {% if e.status|lower == 'completed' %}
+                        <a href="{% url 'my_results' %}?exam={{ e.exam.id }}" class="btn-secondary py-1.5 px-3 text-xs">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                            <span>View Result</span>
+                        </a>
+                        {% elif e.status|lower == 'in progress' %}
+                        <a href="{% url 'start_exam' e.exam.id %}" class="btn-secondary py-1.5 px-3 text-xs">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            <span>Resume</span>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'exam_guidelines' e.exam.id %}" class="btn-primary py-1.5 px-3 text-xs">
+                            <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                            <span>Begin</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card text-center py-5 border-dashed border-slate-200 bg-white">
+                <p class="text-xs text-slate-400">No exams in this subject yet.</p>
+            </div>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </section>
+    {% else %}
+    <!-- ─────────────── EMPTY STATE ──────────────────────────── -->
+    <div class="card text-center border-dashed border-slate-200">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-400">
+            <i data-lucide="book-open-check" class="h-7 w-7"></i>
+        </div>
+        <h2 class="text-h2 text-slate-700">No subjects assigned yet</h2>
+        <p class="text-body text-slate-400 mt-2 max-w-md mx-auto">
+            Once your instructor assigns subjects, they'll appear here with available exams and your progress.
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

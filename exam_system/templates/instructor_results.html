@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Exam Results{% endblock %}
+{% block page_heading %}Exam Results{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <section class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-label mb-2">Results</p>
+            <h1 class="text-h1">Exam Results</h1>
+            <p class="text-body mt-2 max-w-3xl">
+                Select an exam to view student results and integrity details.
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'export_csv' %}{% if selected_exam_id %}?exam={{ selected_exam_id }}{% endif %}" class="btn-secondary">
+                <i data-lucide="download" class="h-4 w-4"></i>
+                <span>Export CSV</span>
+            </a>
+            <a href="{% url 'export_pdf' %}{% if selected_exam_id %}?exam={{ selected_exam_id }}{% endif %}" class="btn-primary">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                <span>Export PDF</span>
+            </a>
+        </div>
+    </section>
+
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div class="rounded-md border px-4 py-2 {% if message.tags == 'success' %}border-slate-300 bg-slate-50 text-slate-700{% else %}border-red-200 bg-red-50 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Exam Selector -->
+    <div class="card">
+        <form method="GET" class="flex flex-col gap-4">
+            <div>
+                <label class="field-label" for="exam">Select Exam</label>
+                <select name="exam" id="exam" class="field-select w-full sm:w-64" onchange="this.form.submit()">
+                    <option value="">All Exams</option>
+                    {% for exam_item in exams %}
+                    <option value="{{ exam_item.id }}" {% if selected_exam_id == exam_item.id %}selected{% endif %}>
+                        {{ exam_item.title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    {% if results %}
+    <section class="space-y-4">
+        {% for r in results %}
+        <article class="card">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h2 class="font-semibold text-slate-900">{{ r.exam.title }}</h2>
+                    <p class="text-sm text-slate-500">Student: {{ r.student.username }}</p>
+                    <p class="text-sm text-slate-500">Subject: {{ r.exam.subject.name }}</p>
+                </div>
+<div class="text-left sm:text-right">
+                        <p class="text-label">Score</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ r.score|floatformat:0 }}/{{ r.exam.total_questions }}</p>
+                        <p class="text-sm font-semibold text-blue-600">{{ r.percentage_score }}%</p>
+                    </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                <div class="rounded-md bg-slate-50 px-4 py-3">
+                    <p class="text-label mb-1">Start Time</p>
+                    <p class="font-medium text-slate-900">{{ r.start_time|date:"M d, Y g:i A" }}</p>
+                </div>
+                <div class="rounded-md bg-slate-50 px-4 py-3">
+                    <p class="text-label mb-1">End Time</p>
+                    <p class="font-medium text-slate-900">{% if r.end_time %}{{ r.end_time|date:"M d, Y g:i A" }}{% else %}Not Finished{% endif %}</p>
+                </div>
+            </div>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+                <span class="inline-flex rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700">Status: {{ r.get_status_display }}</span>
+                {% if r.integrity_score is not None %}
+                <span class="inline-flex rounded-full px-3 py-1.5 text-sm font-bold {% if r.risk_level == 'CRITICAL' %}bg-red-100 text-red-700{% elif r.risk_level == 'HIGH' %}bg-orange-100 text-orange-700{% elif r.risk_level == 'MEDIUM' %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %}">
+                    {{ r.integrity_score }}% {{ r.risk_level }}
+                </span>
+                {% endif %}
+                {% if r.violation_count is not None %}
+                <span class="inline-flex rounded-full bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700">Violations: {{ r.violation_count }}</span>
+                {% endif %}
+                <a href="{% url 'view_logs' r.student.id %}?exam={{ r.exam.id }}" class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100">
+                    <i data-lucide="eye" class="h-3 w-3"></i>
+                    View Logs
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+    {% else %}
+    <div class="card text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-md bg-slate-100 text-slate-400">
+            <i data-lucide="file-text" class="h-7 w-7"></i>
+        </div>
+        <h2 class="text-h2">No results found</h2>
+        <p class="text-body mt-2">No students have completed exams for the selected criteria.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

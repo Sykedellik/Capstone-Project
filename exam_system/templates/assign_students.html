@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Assign Students{% endblock %}
+{% block page_heading %}Subject Enrollment{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ─────────────── HEADER ──────────────────────────────── -->
+    <section class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-label mb-1">Enrollment</p>
+            <h1 class="text-h1">Assign Students</h1>
+            <p class="text-body mt-2 max-w-3xl">
+                Enroll students into your subjects and manage existing enrollments.
+            </p>
+        </div>
+        <a href="{% url 'instructor_dashboard' %}" class="btn-secondary">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Back to Dashboard</span>
+        </a>
+    </section>
+
+    {% if messages %}
+    <div class="space-y-3">
+        {% for message in messages %}
+        <div class="rounded-md border px-4 py-3 {% if message.tags == 'success' %}border-green-200 bg-green-50 text-green-800{% elif message.tags == 'error' %}border-red-200 bg-red-50 text-red-800{% else %}border-slate-200 bg-slate-50 text-slate-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ─────────────────── ENROLL FORM ─────────────────────── -->
+    <section class="rounded-lg border border-slate-200 bg-white p-5">
+        <div class="mb-5">
+            <p class="text-label mb-1">New Assignment</p>
+            <h2 class="text-h2">Enroll a Student</h2>
+            <p class="text-body mt-1">Select a subject and choose a student to enroll.</p>
+        </div>
+
+        {% if subjects and students %}
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="field-label">Subject</label>
+                    <select name="subject" required class="field-select">
+                        <option value="" disabled selected>Select a subject</option>
+                        {% for s in subjects %}
+                            <option value="{{ s.id }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="field-label">Student (Username)</label>
+                    <input type="text" list="student_list" name="student_username" placeholder="Type or select a username..." required class="field-input">
+                    <datalist id="student_list">
+                        {% for s in students %}
+                            <option value="{{ s.username }}"></option>
+                        {% endfor %}
+                    </datalist>
+                </div>
+            </div>
+            <div class="flex items-center justify-end">
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="user-plus" class="h-4 w-4"></i>
+                    <span>Enroll Student</span>
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <div class="rounded-md border border-dashed border-slate-300 p-6 text-center text-slate-500">
+            {% if not subjects %}
+            No subjects available. Create a subject first.
+            {% elif not students %}
+    No students registered in the system.
+    {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ─────────────────── ENROLLED LIST ──────────────────── -->
+    <section class="rounded-lg border border-slate-200 bg-white p-5">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-label mb-1">Active Enrollments</p>
+                <h2 class="text-h2">Enrolled Students</h2>
+                <p class="text-body mt-1">
+                    {% if enrolled_items %}
+                    {{ enrolled_items|length }} student{{ enrolled_items|length|pluralize }} enrolled across your subjects.
+                    {% else %}
+                    No enrollments yet.
+                    {% endif %}
+                </p>
+            </div>
+            {% if enrolled_items %}
+            <span class="inline-flex items-center rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
+                {{ enrolled_items|length }} total
+            </span>
+            {% endif %}
+        </div>
+
+        {% if enrolled_items %}
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {% for item in enrolled_items %}
+            <div class="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 transition hover:border-slate-300 hover:shadow-sm">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600">
+                    {{ item.student.username|slice:":2"|upper }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-semibold text-slate-900">{{ item.student.username }}</p>
+                    <p class="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
+                        <span class="inline-flex rounded-md bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">
+                            {{ item.subject.code|default:item.subject.name|slice:":8" }}
+                        </span>
+                        <span class="truncate">{{ item.subject.name }}</span>
+                    </p>
+                </div>
+                <a href="{% url 'remove_student' item.id %}"
+                   class="shrink-0 rounded-md p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                   data-confirm
+                   data-confirm-title="Remove Student"
+                   data-confirm-message="Remove {{ item.student.username }} from {{ item.subject.name }}?"
+                   data-confirm-label="Remove"
+                   data-confirm-color="#dc2626"
+                   title="Remove">
+                    <i data-lucide="user-minus" class="h-4 w-4"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="rounded-md border border-dashed border-slate-300 p-8 text-center text-slate-500">
+            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-400">
+                <i data-lucide="users" class="h-6 w-6"></i>
+            </div>
+            <p class="text-sm font-medium text-slate-600">No enrollments yet</p>
+            <p class="mt-1 text-xs text-slate-400">Use the form above to enroll students into your subjects.</p>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+});
+</script>
+{% endblock %}

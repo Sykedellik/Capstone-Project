@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Exam LMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --border-strong: #cbd5e1;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            position: relative;
+            overflow: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(30, 64, 175, 0.2) 0%, transparent 50%);
+        }
+        .register-card {
+            background: #f8fafc;
+            border-radius: 1.25rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 10;
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .register-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+        .register-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+        .register-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            margin-top: 0.5rem;
+        }
+        .form-field {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .form-input-wrapper {
+            position: relative;
+        }
+        .form-input {
+            width: 100%;
+            border: 1px solid var(--border-strong);
+            border-radius: 0.75rem;
+            padding: 0.875rem 2.5rem 0.875rem 1rem;
+            font-size: 1rem;
+            color: var(--text);
+            outline: none;
+            transition: all 0.2s;
+        }
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.9375rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+        }
+        .message {
+            border-radius: 0.75rem;
+            padding: 0.875rem 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        .message-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .login-link a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        .info-box {
+            background: #dbeafe;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-box p {
+            font-size: 0.8125rem;
+            color: #1e40af;
+            margin: 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        .info-box svg {
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <div class="register-header">
+            <div class="register-icon">
+                <i data-lucide="user-plus" class="w-7 h-7"></i>
+            </div>
+            <h1 class="register-title">Create Account</h1>
+            <p class="register-subtitle">Join as a student</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message message-error">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="info-box">
+            <p>
+                <i data-lucide="info" class="w-4 h-4"></i>
+                Instructors are added by administrators. Contact your school for access.
+            </p>
+        </div>
+
+        <form method="post" onsubmit="return validateForm()">
+            {% csrf_token %}
+            
+            <div class="form-field">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-input" style="padding-left: 1rem;" placeholder="Choose a username" required>
+            </div>
+            
+<div class="form-field">
+                <label class="form-label">Password</label>
+                <div class="form-input-wrapper">
+                    <input type="password" name="password" id="password" class="form-input" placeholder="Choose a password" autocomplete="new-password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <i data-lucide="eye" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-field">
+                <label class="form-label">Confirm Password</label>
+                <div class="form-input-wrapper">
+                    <input type="password" name="confirm_password" id="confirm_password" class="form-input" placeholder="Confirm your password" autocomplete="new-password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                        <i data-lucide="eye" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <script>
+                function validateForm() {
+                    const pass = document.getElementById('password').value;
+                    const confirm = document.getElementById('confirm_password').value;
+                    
+                    if (pass !== confirm) {
+                        alert("Passwords do not match!");
+                        return false;
+                    }
+                    
+                    if (pass.length < 8) {
+                        alert("Password must be at least 8 characters!");
+                        return false;
+                    }
+                    
+                    return true;
+                }
+            </script>
+
+            <button type="submit" class="btn-primary">
+                <i data-lucide="user-check" class="w-4 h-4"></i>
+                Create Account
+            </button>
+        </form>
+
+        <p class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Sign in</a>
+        </p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const btn = field.nextElementSibling;
+            const icon = btn.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                field.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

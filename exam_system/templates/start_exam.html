@@ -1,0 +1,487 @@
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} - Exam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            text-decoration: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        }
+        
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #f1f5f9;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .option-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        .option-card:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+        input[type="radio"]:checked + .option-card {
+            border-color: var(--primary);
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .option-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        input[type="radio"]:checked + .option-card .option-letter {
+            background: var(--primary);
+            color: white;
+        }
+
+        .exam-container {
+            max-width: 48rem;
+            margin: 0 auto;
+        }
+        
+        .question-nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            transition: all 0.2s;
+        }
+        .question-nav-dot.answered {
+            background: #22c55e;
+        }
+        .question-nav-dot.current {
+            background: #2563eb;
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+<body>
+
+    
+
+<!-- SAVE STATUS -->
+<div id="save-status" class="fixed right-4 top-28 z-40 hidden">
+    <span class="bg-white px-4 py-2 rounded-full text-sm font-medium text-slate-600 shadow-sm">
+        Saving...
+    </span>
+</div>
+
+    <!-- TOP BAR -->
+    <div class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+        <div class="exam-container px-4 py-4 sm:px-6">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-lg font-bold text-slate-900 truncate">{{ exam.title }}</h1>
+                    <p class="text-sm text-slate-500">Question {{ current_index }} of {{ questions|length }}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="rounded-md bg-slate-100 px-4 py-2">
+                        <p class="text-xs text-slate-500 uppercase tracking-wide">Progress</p>
+                        <p class="text-lg font-bold text-slate-900">{{ answered_count }}/{{ questions|length }}</p>
+                    </div>
+                    {% if duration_enabled %}
+                    <div class="bg-red-50 px-4 py-2 border border-red-200 rounded-md">
+                        <p class="text-xs text-red-600 uppercase tracking-wide">Time Left</p>
+                        <p id="timer" class="text-xl font-bold text-red-600">--:--</p>
+                    </div>
+                    {% else %}
+                    <div class="rounded-md bg-slate-100 px-4 py-2">
+                        <p class="text-xs text-slate-500 uppercase tracking-wide">Time</p>
+                        <p class="text-xl font-bold text-slate-700">Unlimited</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="bg-white border-b border-slate-100">
+        <div class="exam-container px-4 py-2 sm:px-6">
+            <div class="flex flex-wrap gap-2">
+                {% for q in questions %}
+                <button type="button" onclick="goToQuestion({{ forloop.counter }})" class="question-nav-dot {% if saved_answers|get_item:q.id %}answered{% endif %} {% if current_index == forloop.counter %}current{% endif %}" title="Question {{ forloop.counter }}"></button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="exam-container px-4 py-8 sm:px-6">
+            <form id="exam-form" method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div class="bg-white rounded-md border border-slate-200 p-4 sm:p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
+                        Question {{ current_index }}
+                    </span>
+                </div>
+
+                <h2 class="text-base font-semibold text-slate-900 mb-4">
+                    {{ current_question.question_text }}
+                </h2>
+
+                <div class="space-y-3">
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="q{{ current_question.id }}" value="A" class="sr-only peer"
+                            {% if saved_answers|get_item:current_question.id == 'A' %}checked{% endif %}>
+                        <div class="option-card">
+                            <span class="option-letter">A</span>
+                            <span class="text-slate-700">{{ current_question.option_a }}</span>
+                        </div>
+                    </label>
+                    
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="q{{ current_question.id }}" value="B" class="sr-only peer"
+                            {% if saved_answers|get_item:current_question.id == 'B' %}checked{% endif %}>
+                        <div class="option-card">
+                            <span class="option-letter">B</span>
+                            <span class="text-slate-700">{{ current_question.option_b }}</span>
+                        </div>
+                    </label>
+                    
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="q{{ current_question.id }}" value="C" class="sr-only peer"
+                            {% if saved_answers|get_item:current_question.id == 'C' %}checked{% endif %}>
+                        <div class="option-card">
+                            <span class="option-letter">C</span>
+                            <span class="text-slate-700">{{ current_question.option_c }}</span>
+                        </div>
+                    </label>
+                    
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="q{{ current_question.id }}" value="D" class="sr-only peer"
+                            {% if saved_answers|get_item:current_question.id == 'D' %}checked{% endif %}>
+                        <div class="option-card">
+                            <span class="option-letter">D</span>
+                            <span class="text-slate-700">{{ current_question.option_d }}</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                {% if has_prev %}
+                <button type="button" onclick="goToQuestion({{ prev_index }})" class="btn-secondary" id="btn-prev">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Previous
+                </button>
+                {% else %}
+                <div></div>
+                {% endif %}
+                
+                {% if has_next %}
+                <button type="button" onclick="goToQuestion({{ next_index }})" class="btn-primary" id="btn-next">
+                    Next
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+                {% else %}
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    Submit Exam
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        let isSubmitting = false;
+        let lastEventTime = 0;
+        let isNavigating = false;
+        let isPageReload = false;
+
+        // Log page refresh as a violation
+        function logRefreshIfDetected() {
+            let isRefresh = false;
+            
+            if (window.performance && window.performance.getEntriesByType) {
+                const navigationEntries = performance.getEntriesByType('navigation');
+                if (navigationEntries.length > 0 && navigationEntries[0].type === 'reload') {
+                    isRefresh = true;
+                }
+            }
+            
+            if (!isRefresh && window.performance && window.performance.navigation) {
+                if (window.performance.navigation.type === 1) {
+                    isRefresh = true;
+                }
+            }
+            
+            if (isRefresh && !isSubmitting) {
+                fetch('/log-event/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: 'event_type=refresh&exam_id={{ exam.id }}'
+                }).catch(err => console.error('Refresh logging failed:', err));
+            }
+        }
+
+        logRefreshIfDetected();
+
+        // Navigate to question without full refresh feel
+        function goToQuestion(q) {
+            if (isNavigating || isSubmitting) return;
+            isNavigating = true;
+            
+            // Show loading state
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            if (btnPrev) {
+                btnPrev.disabled = true;
+                btnPrev.innerHTML = '<i class="animate-spin" data-lucide="loader-2" class="w-4 h-4"></i>...';
+            }
+            if (btnNext) {
+                btnNext.disabled = true;
+                btnNext.innerHTML = '<i class="animate-spin" data-lucide="loader-2" class="w-4 h-4"></i>...';
+            }
+            
+            // Navigate
+            window.location.href = "?q=" + q;
+        }
+
+        {% if duration_enabled %}
+        // Timer with sessionStorage for refresh safety
+        let endTime = sessionStorage.getItem('exam_end_time');
+
+        if (!endTime) {
+            endTime = Date.now() + ({{ duration_seconds }} * 1000);
+            sessionStorage.setItem('exam_end_time', endTime);
+        } else {
+            endTime = parseInt(endTime);
+            // If saved time is already past, reset it (user started fresh)
+            if (endTime < Date.now()) {
+                endTime = Date.now() + ({{ duration_seconds }} * 1000);
+                sessionStorage.setItem('exam_end_time', endTime);
+            }
+        }
+
+        function updateTimer() {
+            let now = Date.now();
+            let remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+
+            if (remaining <= 0) {
+                document.getElementById('timer').textContent = '0:00';
+                clearInterval(timerInterval);
+                if (!isSubmitting) {
+                    isSubmitting = true;
+                    if (confirm('Time is up! Your exam session has ended. Click OK to submit your answers.')) {
+                        document.getElementById('exam-form').submit();
+                    } else {
+                        document.getElementById('exam-form').submit();
+                    }
+                }
+                return;
+            }
+            let minutes = Math.floor(remaining / 60);
+            let seconds = remaining % 60;
+            document.getElementById('timer').textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        }
+        let timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+        {% endif %}
+
+        function saveAnswer(questionId, selectedOption) {
+            const statusEl = document.getElementById('save-status');
+            statusEl.classList.remove('hidden');
+            statusEl.querySelector('span').textContent = 'Saving...';
+            statusEl.querySelector('span').className = 'bg-white px-4 py-2 rounded-full text-sm font-medium text-amber-600 shadow-sm';
+
+            fetch('/save-answer/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: 'question_id=' + questionId + '&selected=' + selectedOption + '&exam_id={{ exam.id }}'
+            })
+            .then(r => {
+                if (!r.ok) throw new Error("Request failed");
+                return r.json();
+            })
+            .then(data => {
+                if (data.status === 'saved') {
+                    statusEl.querySelector('span').textContent = 'Saved';
+                    statusEl.querySelector('span').className = 'bg-white px-4 py-2 rounded-full text-sm font-medium text-green-600 shadow-sm';
+                    setTimeout(() => {
+                        statusEl.classList.add('hidden');
+                    }, 2000);
+                }
+            })
+            .catch(err => {
+                console.error('Save failed:', err);
+            });
+        }
+
+        // Radio event listeners for auto-save
+        let saveTimeout;
+        document.querySelectorAll('input[type=radio]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                clearTimeout(saveTimeout);
+                const qId = this.name.replace('q', '');
+                const selected = this.value;
+                saveTimeout = setTimeout(() => {
+                    saveAnswer(qId, selected);
+                }, 300);
+            });
+        });
+
+        function triggerEvent(eventType, penalty) {
+            // Skip if page is being unloaded/reloaded
+            if (isPageReload || isSubmitting) return;
+            
+            let now = Date.now();
+            if (now - lastEventTime < 1000) return; // Reduced to 1 second cooldown
+            lastEventTime = now;
+
+            fetch('/log-event/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: 'event_type=' + eventType + '&exam_id={{ exam.id }}'
+            })
+            .then(r => {
+                if (!r.ok) throw new Error("Request failed");
+                return r.json();
+            })
+            .then(data => {
+                // Only auto-submit on CRITICAL risk (50+ penalties)
+                if (data.status === 'logged' && data.risk === 'CRITICAL' && !isSubmitting) {
+                    isSubmitting = true;
+                    alert('Session terminated due to repeated violations.');
+                    document.getElementById('exam-form').submit();
+                }
+            })
+            .catch(err => {
+                console.error('Event logging failed:', err);
+            });
+        }
+
+        // Prevent right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            triggerEvent('right_click', 1);
+        });
+
+        // Prevent copy/paste
+        document.addEventListener('copy', e => {
+            e.preventDefault();
+            triggerEvent('copy_attempt', 3);
+        });
+
+        // Detect tab / window switching via page visibility API
+        window.addEventListener('visibilitychange', function() {
+            if (document.hidden && !isSubmitting && !isNavigating) {
+                triggerEvent('tab_switch', 5);
+            }
+        });
+
+        // Tab-switch detection using a sentinel animation frame
+        let lastVisibility = document.visibilityState;
+        (function monitorVisibility() {
+            if (document.visibilityState !== lastVisibility && !isSubmitting && !isNavigating) {
+                lastVisibility = document.visibilityState;
+                if (document.hidden) {
+                    triggerEvent('tab_switch', 5);
+                }
+            }
+            requestAnimationFrame(monitorVisibility);
+        })();
+
+        // Unanswered warning - only shows if current question not answered on last question
+        document.getElementById('exam-form').addEventListener('submit', function(e) {
+            if (isSubmitting) return;
+
+            // Only check on last question
+            if ({{ has_next|yesno:"false,true" }}) return;
+
+            // Check if current question is answered
+            const currentQId = {{ current_question.id }};
+            const currentAnswered = {{ saved_answers|get_item:current_question.id|stringformat:"s"|default:"null" }};
+            
+            // If not the last question or current Q has answer, skip warning
+            if (currentAnswered && currentAnswered !== 'null') return;
+
+            if (!confirm('You have not answered this question. Submit anyway?')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

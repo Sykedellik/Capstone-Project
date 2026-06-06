@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="w-full">
+    <div class="bg-white p-4 rounded-md border border-slate-200">
+        <div class="text-center border-b border-slate-200 pb-4">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-700">
+                &#x2713;
+            </div>
+            <h1 class="text-2xl font-semibold text-slate-900">Exam Submitted Successfully</h1>
+            <p class="mt-2 text-sm text-slate-500">
+                Your exam session has ended and the submission has been recorded.
+            </p>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-medium text-slate-500">Exam</p>
+                <h2 class="mt-2 text-base font-semibold text-slate-900">{{ result.exam.title }}</h2>
+                <p class="mt-1 text-sm text-slate-600">{{ result.exam.subject.name }}</p>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-medium text-slate-500">Student</p>
+                <h2 class="mt-2 text-base font-semibold text-slate-900">{{ result.student.username }}</h2>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4 md:col-span-2 text-center">
+                <p class="text-sm font-medium text-slate-600">Final Score</p>
+                <p class="mt-2 text-3xl font-bold text-slate-900">{{ score }} / {{ total }}</p>
+                <p class="mt-1 text-lg font-semibold text-blue-600">{{ percentage_score }}%</p>
+                <p class="mt-2 text-sm text-slate-600">
+                    <!-- Performance feedback removed as requested -->
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-medium text-slate-500">Status</p>
+                <p class="mt-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
+                    Submitted
+                </p>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-medium text-slate-500">Integrity Score</p>
+                <p class="mt-2 text-xl font-bold text-slate-900">{{ result.integrity_score }}%</p>
+            </div>
+
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-medium text-slate-500">Risk Level</p>
+                <p class="mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold {% if result.risk_level == 'LOW' %}bg-slate-100 text-slate-700{% elif result.risk_level == 'MEDIUM' %}bg-slate-100 text-slate-700{% elif result.risk_level == 'HIGH' %}bg-red-100 text-red-700{% else %}bg-slate-100 text-slate-700{% endif %}">
+                    {{ result.risk_level|default:"Pending" }}
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+            <h3 class="text-base font-semibold text-slate-900">Session Timeline</h3>
+            <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <p class="text-label mb-1">Started</p>
+                    <p class="text-sm text-slate-700">
+                        {% if attempt and attempt.start_time %}
+                            {{ attempt.start_time|date:"M d, Y g:i A" }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-label mb-1">Submitted</p>
+                    <p class="text-sm text-slate-700">
+                        {% if attempt and attempt.end_time %}
+                            {{ attempt.end_time|date:"M d, Y g:i A" }}
+                        {% else %}
+                            {{ result.submitted_at|date:"M d, Y g:i A" }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <a href="{% url 'certificate' result.id %}" target="_blank" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-award" style="margin-right: 0.4rem;"><path d="m15.477 12.89 1.515-8.526a3 3 0 0 0-.664-2.624L11.04 2.28a3 3 0 0 0-3.617 0L3.693 1.74a3 3 0 0 0-.665 2.624l1.515 8.526a3 3 0 0 0 3.002 2.648l5.32.433a3 3 0 0 0 3.212-2.653Z"/><path d="M12 12v6"/><path d="M8 18h8"/></svg>
+                View Certificate
+            </a>
+            <a href="{% url 'certificate' result.id %}" target="_blank" class="inline-flex items-center justify-center rounded-md bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-file-down" style="margin-right: 0.4rem;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M12 12v4"/></svg>
+                Print Certificate
+            </a>
+            <a href="{% url 'my_results' %}" class="inline-flex items-center justify-center rounded-md bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-300">
+                View My Results
+            </a>
+        </div>
+        <div class="mt-3 flex justify-center">
+            <a href="{% url 'student_dashboard' %}" class="inline-flex items-center justify-center text-sm font-medium text-slate-500 transition hover:text-slate-700">
+                Return to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+sessionStorage.removeItem('exam_started');
+</script>
+{% endblock %}

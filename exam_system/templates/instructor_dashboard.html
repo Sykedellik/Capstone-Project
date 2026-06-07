@@ -102,8 +102,9 @@
                 </div>
 
                 {% if exams %}
-                <div class="overflow-hidden rounded-lg border border-slate-200">
-                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <div class="overflow-x-auto">
+                <div class="min-w-full divide-y divide-slate-200 text-sm">
+                     <table class="min-w-full divide-y divide-slate-200 text-sm">
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Exam</th>
@@ -137,6 +138,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
                 </div>
                 {% if exams|length > 8 %}
                 <div class="mt-4 text-center">

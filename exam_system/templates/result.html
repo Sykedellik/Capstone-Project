@@ -81,14 +81,10 @@
             </div>
         </div>
 
-        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <a href="{% url 'certificate' result.id %}" target="_blank" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-award" style="margin-right: 0.4rem;"><path d="m15.477 12.89 1.515-8.526a3 3 0 0 0-.664-2.624L11.04 2.28a3 3 0 0 0-3.617 0L3.693 1.74a3 3 0 0 0-.665 2.624l1.515 8.526a3 3 0 0 0 3.002 2.648l5.32.433a3 3 0 0 0 3.212-2.653Z"/><path d="M12 12v6"/><path d="M8 18h8"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-award" style="margin-right: 0.4rem;"><path d="m15.477 12.89 1.515-8.526a3 0 0 0-.664-2.624L11.04 2.28a3 0 0 0-3.617 0L3.693 1.74a3 0 0 0-.665 2.624l1.515 8.526a3 0 0 0 3.002 2.648l5.32.433a3 0 0 0 3.212-2.653Z"/><path d="M12 12v6"/><path d="M8 18h8"/></svg>
                 View Certificate
-            </a>
-            <a href="{% url 'certificate' result.id %}" target="_blank" class="inline-flex items-center justify-center rounded-md bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-file-down" style="margin-right: 0.4rem;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M12 12v4"/></svg>
-                Print Certificate
             </a>
             <a href="{% url 'my_results' %}" class="inline-flex items-center justify-center rounded-md bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-300">
                 View My Results

@@ -24,7 +24,6 @@
             padding: 48px 40px;
         }
 
-        /* ---- HEADER ---- */
         .report-header {
             text-align: center;
             padding-bottom: 22px;
@@ -32,25 +31,11 @@
             border-bottom: 2px solid #111827;
         }
 
-        .report-header .logo-icon {
-            width: 44px;
-            height: 44px;
-            margin: 0 auto 10px;
-            background: #111827;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 20px;
-        }
-
         .report-header h1 {
             font-size: 20px;
             font-weight: 800;
             color: #111827;
             margin: 0 0 3px;
-            letter-spacing: -0.4px;
         }
 
         .report-header .subtitle {
@@ -60,7 +45,6 @@
             margin: 0;
         }
 
-        /* ---- META BAR ---- */
         .meta-bar {
             display: flex;
             justify-content: space-between;
@@ -82,7 +66,6 @@
             font-weight: 600;
         }
 
-        /* ---- SUMMARY STATS ---- */
         .summary-strip {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -103,7 +86,6 @@
             font-weight: 800;
             color: #111827;
             line-height: 1.2;
-            letter-spacing: -0.4px;
         }
 
         .summary-card .label {
@@ -115,7 +97,6 @@
             margin-top: 4px;
         }
 
-        /* ---- TABLE ---- */
         .results-table {
             width: 100%;
             border-collapse: separate;
@@ -153,10 +134,6 @@
             background: #fafafa;
         }
 
-        .results-table tbody tr:hover {
-            background: #f3f4f6;
-        }
-
         .student-cell {
             font-weight: 600;
         }
@@ -171,7 +148,6 @@
             color: #1e40af;
         }
 
-        /* ---- RISK BADGE ---- */
         .risk {
             display: inline-block;
             padding: 3px 10px;
@@ -187,14 +163,6 @@
         .risk-HIGH { background: #ffedd5; color: #9a3412; }
         .risk-CRITICAL { background: #fee2e2; color: #991b1b; }
 
-        /* ---- DIVIDER ---- */
-        .divider {
-            border: none;
-            border-top: 1px solid #e5e7eb;
-            margin: 8px 0 20px;
-        }
-
-        /* ---- EMPTY STATE ---- */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -206,7 +174,6 @@
             margin-bottom: 28px;
         }
 
-        /* ---- FOOTER ---- */
         .report-footer {
             margin-top: 36px;
             padding-top: 14px;
@@ -216,88 +183,110 @@
             color: #9ca3af;
         }
 
-        .report-footer strong {
-            color: #6b7280;
+        .print-btn-wrapper{
+            text-align:center;
+            margin:40px 0 20px;
         }
 
-        /* ---- PRINT ---- */
+        .print-btn{
+            padding:10px 20px;
+            font-size:14px;
+            font-weight:600;
+            background:#3b82f6;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            transition:background 0.2s;
+        }
+
+        .print-btn:hover{
+            background:#2563eb;
+        }
+
         @media print {
-            body {
-                font-size: 11px;
+            @page {
+                size: A4 portrait;
+                margin:1.5cm;
             }
-            .page {
-                padding: 24px 20px;
-                max-width: none;
+
+            body{
+                margin:0;
+                padding:0;
             }
-            .report-header h1 {
-                font-size: 17px;
+
+            .page{
+                padding:20px;
+                max-width:none;
             }
-            .summary-card .value {
-                font-size: 20px;
+
+            .print-btn-wrapper{
+                display:none;
             }
-            .results-table thead th {
-                font-size: 9.5px;
-            }
-            .results-table tbody td {
-                font-size: 10.5px;
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="page">
+<div class="print-btn-wrapper">
+<button onclick="window.print()" class="print-btn">Print Report</button>
+</div>
+<div class="page">
 
-        <div class="report-header">
-            <div class="logo-icon">&#x1F4CB;</div>
-            <h1>Exam Results & Integrity Report</h1>
-            <p class="subtitle">Secure Online Examination System &mdash; Grouped by Student</p>
-        </div>
-
-        <div class="meta-bar">
-            <div class="meta-item">Generated: <strong>{% now "M d, Y g:i A" %}</strong></div>
-            <div class="meta-item">System: <strong>Secure Online Examination Portal (IS Capstone)</strong></div>
-            <div class="meta-item">Records: <strong>{{ results|length }}</strong></div>
-        </div>
-
-        {% if results %}
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Exam</th>
-                    <th>Score</th>
-                    <th>Percentage</th>
-                    <th>Integrity</th>
-                    <th>Risk Level</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in results %}
-                <tr>
-                    <td class="student-cell">{{ r.student.username }}</td>
-                    <td>{{ r.exam.title }}</td>
-                    <td class="score-cell">{{ r.score }}/{{ r.total_questions }}</td>
-                    <td class="pct-cell">{{ r.percentage_score }}%</td>
-                    <td>{{ r.integrity_score }}%</td>
-                    <td>
-                        <span class="risk risk-{{ r.risk_level|default:'LOW'|upper }}">
-                            {{ r.risk_level|default:'LOW' }}
-                        </span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty-state">No results found for the selected criteria.</div>
-        {% endif %}
-
-        <div class="report-footer">
-            <p><strong>Secure Online Examination System (IS Capstone)</strong></p>
-            <p>This document is a system-generated audit report for academic integrity monitoring.</p>
-            <p>Confidential &mdash; For Academic Use Only</p>
-        </div>
-
+    <div class="report-header">
+        <h1>Exam Results & Integrity Report</h1>
+        <p class="subtitle">Secure Online Examination System &mdash; Grouped by Student</p>
     </div>
+
+    <div class="meta-bar">
+        <div class="meta-item">Generated: <strong>{% now "M d, Y g:i A" %}</strong></div>
+        <div class="meta-item">System: <strong>Secure Online Examination Portal (IS Capstone)</strong></div>
+        <div class="meta-item">Records: <strong>{{ results|length }}</strong></div>
+    </div>
+
+    {% if results %}
+    <table class="results-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Exam</th>
+                <th>Score</th>
+                <th>Percentage</th>
+                <th>Integrity</th>
+                <th>Risk Level</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr>
+                <td class="student-cell">{{ r.student.username }}</td>
+                <td>{{ r.exam.title }}</td>
+                <td class="score-cell">{{ r.score }}/{{ r.total_questions }}</td>
+                <td class="pct-cell">{{ r.percentage_score }}%</td>
+                <td>{{ r.integrity_score }}%</td>
+                <td>
+                    <span class="risk risk-{{ r.risk_level|default:'LOW'|upper }}">
+                        {{ r.risk_level|default:'LOW' }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No results found for the selected criteria.</div>
+    {% endif %}
+
+    <div class="report-footer">
+        <p>Secure Online Examination System (IS Capstone)</p>
+        <p>This document is a system-generated audit report for academic integrity monitoring.</p>
+        <p>Confidential &mdash; For Academic Use Only</p>
+    </div>
+
+</div>
 </body>
 </html>

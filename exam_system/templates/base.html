@@ -66,23 +66,23 @@
             width: var(--sidebar-collapsed);
         }
 
-        .sidebar-mini .nav-label,
-        .sidebar-mini .brand-label,
-        .sidebar-mini .sidebar-footer-label {
+        .sidebar.sidebar-mini .nav-label,
+        .sidebar.sidebar-mini .brand-label,
+        .sidebar.sidebar-mini .sidebar-footer-label {
             display: none;
         }
 
-        .sidebar-mini .nav-link {
+        .sidebar.sidebar-mini .nav-link {
             justify-content: center;
             padding-left: 0.5rem;
             padding-right: 0.5rem;
         }
 
-        .sidebar-mini .nav-link i {
+        .sidebar.sidebar-mini .nav-link i {
             margin-right: 0;
         }
 
-        .sidebar-mini .sidebar-brand {
+        .sidebar.sidebar-mini .sidebar-brand {
             justify-content: center;
         }
 
@@ -101,10 +101,14 @@
             margin-left: var(--sidebar-collapsed);
         }
 
-        /* ---- MOBILE: bottom nav overrides sidebar ---- */
+        /* ---- MOBILE: hide sidebar, show bottom nav ---- */
         @media screen and (max-width: 1023px) {
             .sidebar {
-                display: none;
+                display: none !important;
+            }
+
+            .toggle-btn {
+                display: none !important;
             }
 
             .main-content {
@@ -128,6 +132,10 @@
         @media screen and (min-width: 1024px) {
             .sidebar {
                 display: flex !important;
+            }
+
+            .toggle-btn {
+                display: inline-flex !important;
             }
 
             .main-content {
@@ -623,6 +631,10 @@
                 <i data-lucide="file-text" class="w-5 h-5"></i>
                 <span>Results</span>
             </a>
+            <a href="{% url 'logout' %}" class="mobile-nav-link text-red-500">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Logout</span>
+            </a>
             {% elif user.profile.role == 'instructor' %}
             <a href="{% url 'instructor_dashboard' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'instructor_dashboard' %}active{% endif %}">
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
@@ -636,9 +648,25 @@
                 <i data-lucide="file-plus-2" class="w-5 h-5"></i>
                 <span>Create</span>
             </a>
+            <a href="{% url 'question_bank' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'question_bank,add_question,edit_question' %}active{% endif %}">
+                <i data-lucide="library-big" class="w-5 h-5"></i>
+                <span>Questions</span>
+            </a>
+            <a href="{% url 'assign_students' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'assign_students' %}active{% endif %}">
+                <i data-lucide="users-round" class="w-5 h-5"></i>
+                <span>Students</span>
+            </a>
+            <a href="{% url 'analytics' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                <span>Analytics</span>
+            </a>
             <a href="{% url 'instructor_results' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'instructor_results' %}active{% endif %}">
                 <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                 <span>Results</span>
+            </a>
+            <a href="{% url 'logout' %}" class="mobile-nav-link text-red-500">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Logout</span>
             </a>
             {% endif %}
         {% endif %}
@@ -672,25 +700,20 @@
             lucide.createIcons();
         }
 
-        /* ---------- SIDEBAR TOGGLE ---------- */
-        // Restore sidebar state so it persists across page navigations
-        if (sidebar && sessionStorage.getItem('sidebar') === 'mini') {
-            sidebar.classList.add('sidebar-mini');
-            syncIcon(true);
-        }
-        if (toggle && sidebar) {
-            toggle.addEventListener('click', () => {
-                sidebar.classList.toggle('sidebar-mini');
-                sessionStorage.setItem('sidebar', sidebar.classList.contains('sidebar-mini') ? 'mini' : 'full');
-                syncIcon(sidebar.classList.contains('sidebar-mini'));
-            });
-        }
+         /* ---------- SIDEBAR TOGGLE ---------- */
+         if (sidebar && sessionStorage.getItem('sidebar') === 'mini') {
+             sidebar.classList.add('sidebar-mini');
+             syncIcon(true);
+         }
+         if (toggle && sidebar) {
+             toggle.addEventListener('click', () => {
+                 sidebar.classList.toggle('sidebar-mini');
+                 sessionStorage.setItem('sidebar', sidebar.classList.contains('sidebar-mini') ? 'mini' : 'full');
+                 syncIcon(sidebar.classList.contains('sidebar-mini'));
+             });
+         }
 
-        /* close sidebar drawer on mobile (collapsed = full hide, not mini) */
-        /* On mobile (<1024) sidebar is display:none, so toggle keyframes are handled
-           via CSS: sidebar disappears — mobile-nav provides all navigation */
-
-        lucide.createIcons();
+         lucide.createIcons();
 
         /* ---------- CONFIRM MODAL ---------- */
         const confirmModal   = document.getElementById('confirmModal');

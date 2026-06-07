@@ -57,6 +57,7 @@ urlpatterns = [
     path('toggle-exam/<int:exam_id>/', views.toggle_exam, name='toggle_exam'),
     path('archived-exams/', views.archived_exams, name='archived_exams'),
     path('certificate/<int:result_id>/', views.certificate, name='certificate'),
+    path('certificate/<int:result_id>/pdf/', views.certificate_pdf, name='certificate_pdf'),
 ]
 
 if settings.DEBUG:

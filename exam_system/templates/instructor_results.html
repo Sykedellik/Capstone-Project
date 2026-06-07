@@ -18,9 +18,9 @@
                 <i data-lucide="download" class="h-4 w-4"></i>
                 <span>Export CSV</span>
             </a>
-            <a href="{% url 'export_pdf' %}{% if selected_exam_id %}?exam={{ selected_exam_id }}{% endif %}" class="btn-primary">
-                <i data-lucide="file-text" class="h-4 w-4"></i>
-                <span>Export PDF</span>
+            <a href="{% url 'export_pdf' %}{% if selected_exam_id %}?exam={{ selected_exam_id }}{% endif %}" target="_blank" class="btn-primary" title="Print results">
+                <i data-lucide="printer" class="h-4 w-4"></i>
+                <span>Print Report</span>
             </a>
         </div>
     </section>

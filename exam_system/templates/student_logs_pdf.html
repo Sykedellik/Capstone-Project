@@ -284,19 +284,6 @@
             color: #374151;
         }
 
-        /* ---- EMPTY STATE ---- */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            border: 1px dashed #d1d5db;
-            border-radius: 10px;
-            color: #6b7280;
-            font-size: 13px;
-            background: #f9fafb;
-            margin-bottom: 28px;
-        }
-
-        /* ---- FOOTER ---- */
         .report-footer {
             margin-top: 40px;
             padding-top: 16px;
@@ -309,6 +296,163 @@
 
         .report-footer strong {
             color: #6b7280;
+        }
+
+        /* ---- PRINT / PDF RESPONSIVENESS ---- */
+        @media print {
+            @page {
+                margin: 0.6cm 0.7cm;
+                size: A4;
+            }
+
+            body {
+                font-size: 10px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                padding: 14px 10px;
+                max-width: none;
+            }
+
+            /* Header */
+            .report-header {
+                padding-bottom: 14px;
+                margin-bottom: 16px;
+            }
+
+            .report-header h1 {
+                font-size: 16px;
+            }
+
+            .report-header .subtitle {
+                font-size: 11px;
+            }
+
+            .report-header .logo-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            /* Meta bar – wrap on narrow pages */
+            .meta-bar {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0;
+                margin-bottom: 16px;
+            }
+
+            .meta-cell {
+                padding: 8px 10px;
+            }
+
+            .meta-cell .metalabel {
+                font-size: 8.5px;
+            }
+
+            .meta-cell .metavalue {
+                font-size: 10px;
+            }
+
+            /* Section headings */
+            .section-heading {
+                font-size: 10px;
+                margin-bottom: 8px;
+                padding-bottom: 4px;
+            }
+
+            /* Exam card */
+            .exam-card-row {
+                flex-wrap: wrap;
+            }
+
+            .exam-card-row .key {
+                width: 110px;
+                padding: 8px 10px;
+                font-size: 10.5px;
+            }
+
+            .exam-card-row .value {
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            /* Violations hero */
+            .violations-hero {
+                padding: 14px 16px;
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .hero-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 20px;
+            }
+
+            .hero-number {
+                font-size: 26px;
+            }
+
+            .hero-label {
+                font-size: 9px;
+            }
+
+            .hero-sub {
+                font-size: 10px;
+            }
+
+            /* Violation table */
+            .violation-table {
+                font-size: 9px;
+                margin-bottom: 16px;
+            }
+
+            .violation-table thead th {
+                font-size: 8.5px;
+                padding: 6px 8px;
+            }
+
+            .violation-table tbody td {
+                padding: 5px 8px;
+                font-size: 9px;
+            }
+
+            .event-type-badge {
+                font-size: 8.5px;
+                padding: 1px 6px;
+            }
+
+            /* Empty state */
+            .empty-state {
+                padding: 24px 16px;
+                font-size: 10px;
+                margin-bottom: 16px;
+            }
+
+            /* Footer */
+            .report-footer {
+                margin-top: 18px;
+                padding-top: 10px;
+                font-size: 9px;
+            }
+
+            /* Page-break controls */
+            .section,
+            .exam-card,
+            .violations-hero,
+            .violation-table,
+            .empty-state,
+            .meta-bar {
+                page-break-inside: avoid;
+            }
+
+            .violation-table thead,
+            .violation-table tbody tr {
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>

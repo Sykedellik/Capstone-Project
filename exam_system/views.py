@@ -684,13 +684,18 @@ def certificate(request, result_id):
     if not attempt:
         return redirect('my_results')
 
-    return render(request, 'certificate.html', {
+    return render(request, 'certificate_pdf.html', {
         'result': result,
         'attempt': attempt,
         'student': result.student,
         'exam': result.exam,
         'subject': result.exam.subject,
     })
+
+
+@login_required
+def certificate_pdf(request, result_id):
+    return redirect('certificate', result_id=result_id)
 
 
 @login_required
@@ -1184,16 +1189,16 @@ def export_results_csv(request):
 @instructor_required
 def export_results_pdf(request):
     profile = Profile.objects.get(user=request.user)
-
+    
     if profile.role != 'instructor':
         return redirect('home')
-
+    
     exam_id = request.GET.get('exam')
     subject_ids = Subject.objects.filter(instructor=request.user).values_list('id', flat=True)
     all_results = ExamResult.objects.filter(exam__subject__id__in=subject_ids).order_by('-submitted_at')
     if exam_id:
         all_results = all_results.filter(exam_id=exam_id)
-
+    
     seen = set()
     results = []
     for r in all_results:
@@ -1201,14 +1206,11 @@ def export_results_pdf(request):
         if key not in seen:
             seen.add(key)
             results.append(r)
-
-    # Activate the instructor's timezone for proper time display
+    
     user_tz = pytz.timezone(profile.timezone)
     timezone.activate(user_tz)
-
-    html = render_to_string('pdf_template.html', {'results': results})
-
-    return HttpResponse(html)
+    
+    return render(request, 'pdf_template.html', {'results': results})
 
 
 # =========================
@@ -1466,44 +1468,12 @@ def view_logs(request, user_id):
         'student': student,
         'exam_result': exam_result,
         'violation_count': violation_count,
-        'selected_exam_id': exam_id,
-        'student_id': user_id,
     })
 
 @login_required
 @instructor_required
 def export_student_logs_pdf(request, user_id):
-    profile = Profile.objects.get(user=request.user)
-    if profile.role != 'instructor':
-        return redirect('home')
-    
-    # Activate the instructor's timezone for proper time display
-    import pytz
-    from django.utils import timezone
-    user_tz = pytz.timezone(profile.timezone)
-    timezone.activate(user_tz)
-    
-    student = User.objects.get(id=user_id)
-    exam_id = request.GET.get('exam')
-    
-    if exam_id:
-        logs = IntegrityLog.objects.filter(user_id=user_id, exam_id=exam_id).order_by('-timestamp')
-        exam_result = ExamAttempt.objects.filter(student_id=user_id, exam_id=exam_id).select_related('exam').first()
-    else:
-        logs = IntegrityLog.objects.filter(user_id=user_id).order_by('-timestamp')
-        exam_result = None
-    
-    violation_count = logs.count()
-    
-    html = render_to_string('student_logs_pdf.html', {
-        'logs': logs,
-        'student': student,
-        'exam_result': exam_result,
-        'violation_count': violation_count,
-        'generated_date': timezone.now(),
-    })
-    
-    return HttpResponse(html)
+    return redirect('view_logs', user_id=user_id)
 
 @login_required
 @instructor_required

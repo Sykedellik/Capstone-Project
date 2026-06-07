@@ -1,11 +1,11 @@
-iamthecoordinate1424 - Tj (Student)
+tjstudent@1424 - Tj (Student)
 vivienhugo2468 - Hugo (Instructor)
 lightyagami2468 - Light (Student)
 brucewayne8765 - Batman (Student)
 peterparker1424 - Spidey (Student)
 eduardsonh4ker1424 - Eduardson (Student)
-kenshinsamurai1424 - Kenshin (Student)
-roseprof2468 - Rose (Instructor)
+kenshinstudent1424 - Kenshin (Student)
+roselleprof1424 - Rose (Instructor)
 
 python manage.py makemigrations
 python manage.py migrate

@@ -1,400 +1,1507 @@
 this is the source code of my college's online website's main web page with the sidebar and every section/pages/html... im not saying to completely copy every single thing, but what can make mine more convenient same as their styles/design, besides we basically have a similar design anyway:
 
-this is the login page of my college's website on phone/mobile:
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      GK College
-    </title>
-    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg" />
-    <script src="../js/cdn.tailwindcss.com.3.4.16.js">
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - THIRMIZI</title>
+    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
+
     <style>
-      body {
-            background: #f6f5f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            font-family: &#39;Montserrat&#39;, sans-serif;
-            height: 100vh;
-            margin: 0;
+        body { background-color: #f3f4f6; }
+        .fc-header-toolbar {
+            margin-bottom: 1rem !important; /* Adds a little space below the header */
         }
 
-        /* ===== DEFAULT DESKTOP (HORIZONTAL SLIDE) STYLES ===== */
-
-        .container {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-            position: relative;
-            overflow: hidden;
-            width: 768px;
-            max-width: 100%;
-            min-height: 480px;
-            transition: all 0.3s ease-in-out;
+        .fc-header-toolbar .fc-button {
+            /* Makes the buttons smaller */
+            font-size: 0.60rem !important; /* 12px */
+            padding: 0.3rem 0.6rem !important;
         }
 
-        .form-container {
-            position: absolute;
-            top: 0;
+        .fc-header-toolbar .fc-toolbar-title {
+            /* Reduces the title font size */
+            font-size: 0.85rem !important;
+        }
+
+        .sidebar {
+            transition: width 0.3s ease-in-out;
+            width: 260px;
+            position: fixed;
             height: 100%;
-            transition: all 0.6s ease-in-out;
+            display: block;
+            overflow-x: hidden;
         }
-
-        .student-container {
-            left: 0;
-            width: 50%;
-            z-index: 2;
-        }
-
-        .staff-container {
-            left: 0;
-            width: 50%;
-            opacity: 0;
-            z-index: 1;
-        }
-
-        .container.right-panel-active .student-container {
-            transform: translateX(100%);
-        }
-
-        .container.right-panel-active .staff-container {
-            transform: translateX(100%);
-            opacity: 1;
-            z-index: 5;
-            animation: show 0.6s;
-        }
-
-        @keyframes show {
-            0%, 49.99% { opacity: 0; z-index: 1; }
-            50%, 100% { opacity: 1; z-index: 5; }
-        }
-
-        .overlay-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            transition: transform 0.6s ease-in-out;
-            z-index: 100;
-        }
-
-        .container.right-panel-active .overlay-container{
-            transform: translateX(-100%);
-        }
-
-        .container.right-panel-active .overlay {
-            transform: translateX(50%);
-        }
-
-        .overlay-panel {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 40px;
-            text-align: center;
-            top: 0;
-            height: 100%;
-            width: 50%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
-        }
-
-        .overlay-left {
-            transform: translateX(-20%);
-        }
-
-        .container.right-panel-active .overlay-left {
-            transform: translateX(0);
-        }
-
-        .overlay-right {
-            right: 0;
-            transform: translateX(0);
-        }
-
-        .container.right-panel-active .overlay-right {
-            transform: translateX(20%);
-        }
-
-        form {
-            background-color: #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 50px;
-            height: 100%;
-            text-align: center;
-        }
-
-        input {
-            background-color: #eee;
-            border: none;
-            padding: 12px 15px;
-            margin: 8px 0;
+        .main-content {
+            transition: margin-left 0.3s ease-in-out;
             width: 100%;
+            margin-left: 260px;
+        }
+        .nav-link {
+            display: flex; align-items: center; padding: 1rem 1.5rem; border-radius: 0.5rem;
+            color: #4b5563; font-weight: 500; transition: all 0.2s ease; white-space: nowrap;
+        }
+        .nav-link:hover { background-color: #e5e7eb; color: #1f2937; }
+        .nav-link.active {
+            background-color: #3b82f6; color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .nav-link i { width: 20px; margin-right: 1rem; text-align: center; transition: margin 0.3s ease-in-out; }
+        .sidebar-mini { width: 88px; }
+        .sidebar-mini .nav-link span, .sidebar-mini .logo-text { display: none; }
+        .sidebar-mini .nav-link { justify-content: center; }
+        .sidebar-mini .nav-link i { margin-right: 0; }
+        .mobile-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background-color: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .mobile-nav-link {
+            flex-grow: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 0.5rem 0; font-size: 0.75rem; color: #6b7280;
+        }
+        .mobile-nav-link.active { color: #3b82f6; }
+        @media (max-width: 768px) and (orientation: portrait) {
+            .sidebar, #sidebar-toggle { display: none; }
+            .mobile-nav { display: flex; }
+            .main-content { margin-left: 0 !important; padding-bottom: 80px; }
         }
 
-        button.ghost {
-            background-color: transparent;
-            border-color: #FFFFFF;
-            border-width: 1px;
-        }
+        /* Responsive Table Styles */
+        @media screen and (max-width: 767px) {
+            .responsive-table thead {
+                display: none;
+            }
 
-        .overlay {
-            background: linear-gradient(to right, #42a5f5, #1976d2);
-            color: #FFFFFF;
-            position: relative;
-            left: -100%;
-            height: 100%;
-            width: 200%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out, background 0.6s ease-in-out;
-        }
-        /* This rule changes the color when the staff panel is active */
-        .container.right-panel-active .overlay {
-            /* Choose your new color! */
-            background: linear-gradient(to right, #673ab7, #512da8); /* Example: A Teal/Green Gradient */
-        }
+            /* This rule creates the 'header' for each card on mobile */
+            .responsive-table tr td:first-child {
+                background-color: #f3f4f6; /* Light Gray */
+                font-weight: 700;
+                color: #1f2937;
+            }
 
-
-        /* =================================================================== */
-        /* ===== MOBILE PORTRAIT VIEW (VERTICAL SLIDE) STYLES ===== */
-        /* =================================================================== */
-        @media (max-width: 767px) and (orientation: portrait) {
-        .container {
-            max-width: 100vw;
-            min-height: 100vh;
-            border-radius: 0;
-            box-shadow: none;
+            .responsive-table tbody, .responsive-table tr, .responsive-table td {
+                display: block;
+                width: 100%;
+            }
+            .responsive-table tr {
+                margin-bottom: 1rem;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .responsive-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                text-align: right;
+                border-bottom: 1px solid #eee;
+            }
+            .responsive-table td:last-child {
+                border-bottom: none;
+            }
+            .responsive-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                text-align: left;
+                margin-right: 1rem;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                color: #6b7280;
+            }
         }
-
-        /* Set initial positions for vertical layout */
-        .form-container {
-            height: 50%;
-            width: 100%;
-            left: 0;
-            top: 0;
-        }
-
-        .overlay-container {
-            width: 100%;
-            height: 50%;
-            left: 0;
-            top: 50%;
-            /* Ensure the overlay container can move */
-            transition: transform 0.6s ease-in-out;
-        }
-
-        /* Reset opacity on the hidden staff form for the new animation */
-        .staff-container {
-            opacity: 0;
-            z-index: 1;
-        }
-
-        /* --- VERTICAL SWAP ANIMATION --- */
-
-        /* When active, slide the overlay container UP into the top half */
-        .container.right-panel-active .overlay-container {
-            transform: translateY(-100%);
-        }
-
-        /* When active, slide BOTH form containers DOWN into the bottom half */
-        .container.right-panel-active .student-container,
-        .container.right-panel-active .staff-container {
-            transform: translateY(100%);
-        }
-
-        /* While the forms slide, make the staff form visible */
-        .container.right-panel-active .staff-container {
-            opacity: 1;
-            z-index: 5;
-            animation: show 0.6s;
-        }
-        
-        /* This existing logic for the inner overlay text is still perfect */
-        .overlay {
-            transform: translateY(0);
-            height: 200%;
-            width: 100%;
-            left: 0;
-            top: 0;
-        }
-        .container.right-panel-active .overlay {
-            transform: translateY(-50%);
-        }
-        .overlay-panel {
-            width: 100%;
-            height: 50%;
-            transform: translateY(0);
-        }
-        .container.right-panel-active .overlay-left,
-        .container.right-panel-active .overlay-right {
-            transform: translateX(0);
-        }
-        .overlay-left { top: 50%; }
-        .overlay-right { top: 0; }
-        form { padding: 0 40px; }
-    }
     </style>
-  </head>
-  <body>
-    <div class="container " id="container">
-      <div class="form-container staff-container">
-        <form action="login.php" method="post" class="px-8">
-          <h1 class="font-bold text-2xl mb-4 text-indigo-600">
-            Staff Sign In
-          </h1>
-          <input type="hidden" name="form_type" value="staff" />
-          <div class="relative w-full md:w-3/4 mb-3">
-            <input type="email" name="email" placeholder="Email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required="" />
-          </div>
-          <div class="relative w-full md:w-3/4 mb-3">
-            <div class="relative">
-              <input type="password" name="password" placeholder="Password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline pr-10" required="" />
-              <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="togglePassword">              <i class="fas fa-eye-slash text-gray-500 mb-2"></i>
-</span>
-            </div>
-          </div>
-          <button type="submit" class="rounded-full border border-indigo-600 bg-indigo-600 text-white text-sm font-bold px-12 py-3 uppercase tracking-wider mt-4">
-            Sign In
-          </button>
-        </form>
-      </div>
-      <div class="form-container student-container">
-        <form action="login.php" method="post" class="px-8">
-          <h1 class="font-bold text-2xl text-blue-600 mb-4">
-            Student Sign In
-          </h1>
-          <input type="hidden" name="form_type" value="student" />
-          <div class="relative w-full md:w-3/4 mb-3">
-            <input type="text" name="student_number" placeholder="Student Number" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline pr-10" required="" />
-          </div>
-          <div class="relative w-full md:w-3/4 mb-3">
-            <input type="password" name="password" id="student_password" placeholder="Password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline pr-10" required="" />
-            <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="toggleStudentPassword">            <i class="fas fa-eye-slash text-gray-500"></i>
-</span>
-          </div>
-          <button type="submit" class="rounded-full border border-blue-500 bg-blue-500 text-white text-sm font-bold px-12 py-3 uppercase tracking-wider mt-4">
-            Sign In
-          </button>
-        </form>
-      </div>
-      <div class="overlay-container">
-        <div class="overlay">
-          <div class="overlay-panel overlay-left">
-            <h1 class="font-bold text-3xl">
-              Welcome Back!
-            </h1>
-            <p class="text-sm font-light leading-5 tracking-wide mt-5 mb-8">
-              Are you a student? Please use the student login form.
-            </p>
-            <button class="ghost rounded-full border text-white text-sm font-bold px-12 py-3 uppercase tracking-wider" id="signInStudent">
-              Sign In as Student
-            </button>
-          </div>
-          <div class="overlay-panel overlay-right">
-            <h1 class="font-bold text-3xl">
-              Hello, Staff!
-            </h1>
-            <p class="text-sm font-light leading-5 tracking-wide mt-5 mb-8">
-              Please use your administrative credentials to access the system.
-            </p>
-            <button class="ghost rounded-full border text-white text-sm font-bold px-12 py-3 uppercase tracking-wider" id="signInStaff">
-              Sign In as Staff
-            </button>
-          </div>
+</head>
+<body class="bg-gray-100">
+
+
+<div class="flex h-screen">
+    <aside id="sidebar" class="sidebar bg-white h-full p-4 hidden landscape:flex md:flex flex-col">
+        <div class="flex items-center justify-center mb-6">
+            <img src="../img/logo.png" alt="Logo" class="h-12">
+            <h2 class="logo-text text-xl font-bold ml-2 text-gray-800">Student Portal</h2>
         </div>
-      </div>
-    </div>
-    <script>
-      const signInStaffButton = document.getElementById(&#39;signInStaff&#39;);
-        const signInStudentButton = document.getElementById(&#39;signInStudent&#39;);
-        const container = document.getElementById(&#39;container&#39;);
+        <nav class="flex flex-col space-y-2 flex-grow">
+            <a href="#enrollment" class="nav-link active">
+                <i class="fa-solid fa-file"></i>
+                <span>My Enrollments</span>
+            </a>
+            <a href="#payments" class="nav-link">
+                <i class="fas fa-receipt"></i>
+                <span>Payment Records</span>
+            </a>
+            <a href="#grades" class="nav-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Grades</span>
+            </a>
+            <a href="#academic-calendar" class="nav-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Academic Calendar</span>
+            </a>
+        </nav>
+            <a href="logout_student.php" class="nav-link !mb-0 bg-red-50 hover:bg-red-100 !text-red-600">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+    </aside>
 
-        signInStaffButton.addEventListener(&#39;click&#39;, () =&gt; {
-            container.classList.add(&#34;right-panel-active&#34;);
+    <main id="main-content" class="main-content flex-1 overflow-y-auto px-4 pt-4 pb-24 md:p-8">
+        
+        <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex justify-between items-center">
+            <div class="flex items-center w-full">
+                <button id="sidebar-toggle" class="text-gray-600 hover:text-blue-500 mr-4">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                
+                <div class="flex flex-col items-center text-center w-full md:flex-row md:items-center md:text-left">
+                    <img src="../img/logo.png" alt="Profile Picture" class="w-16 h-16 rounded-full object-cover mb-3 md:mb-0 md:mr-4 border-2 border-gray-200 flex-shrink-0">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">THIRMIZI TAHAJID</h1>
+                        <p class="text-gray-500 text-sm mt-1">
+                            Student No: GKC20250053 |
+                            Program: BSIS |
+                            Status: <span class="font-semibold text-blue-600">Enrolled</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm">
+            <div id="enrollment" class="content-panel p-6">
+                                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Enrollment History</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white responsive-table">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="text-left py-2 px-4">Academic Year</th>
+                                    <th class="text-left py-2 px-4">Trimester</th>
+                                    <th class="text-left py-2 px-4">Assessment Date</th>
+                                    <th class="text-center py-2 px-4">Subjects Enrolled</th>
+                                    <th class="text-center py-2 px-4">Permits</th>
+                                    <th class="text-center py-2 px-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                                                    <tr class="border-b">
+                                        <td class="py-2 px-4" data-label="Academic Year">2025-26</td>
+                                        <td class="py-2 px-4" data-label="Trimester">3</td>
+                                        <td class="py-2 px-4" data-label="Assessment Date">May 4, 2026</td>
+                                        <td class="text-center py-2 px-4" data-label="Subjects Enrolled">3</td>
+                                        <td class="py-2 px-4" data-label="Permits">
+                                            <div class="flex justify-center items-center gap-x-2">
+                                                                                                                                                                                            </div>
+                                        </td>
+                                        <td class="text-center py-2 px-4" data-label="Actions">
+                                            <div class="flex justify-center items-center gap-x-4 text-lg">
+                                                <button type="button" class="view-schedule-btn text-gray-400 hover:text-green-600" title="View Class Links" data-assessment-id="276"><i class="fas fa-video"></i></button>
+                                                <button type="button" class="view-assessment-btn text-gray-400 hover:text-blue-600" title="View Assessment" data-assessment-id="276"><i class="fas fa-eye"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                                                    <tr class="border-b">
+                                        <td class="py-2 px-4" data-label="Academic Year">2025-26</td>
+                                        <td class="py-2 px-4" data-label="Trimester">2</td>
+                                        <td class="py-2 px-4" data-label="Assessment Date">January 12, 2026</td>
+                                        <td class="text-center py-2 px-4" data-label="Subjects Enrolled">6</td>
+                                        <td class="py-2 px-4" data-label="Permits">
+                                            <div class="flex justify-center items-center gap-x-2">
+                                                                                                                                                                                            </div>
+                                        </td>
+                                        <td class="text-center py-2 px-4" data-label="Actions">
+                                            <div class="flex justify-center items-center gap-x-4 text-lg">
+                                                <button type="button" class="view-schedule-btn text-gray-400 hover:text-green-600" title="View Class Links" data-assessment-id="186"><i class="fas fa-video"></i></button>
+                                                <button type="button" class="view-assessment-btn text-gray-400 hover:text-blue-600" title="View Assessment" data-assessment-id="186"><i class="fas fa-eye"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                                                    <tr class="border-b">
+                                        <td class="py-2 px-4" data-label="Academic Year">2025-26</td>
+                                        <td class="py-2 px-4" data-label="Trimester">1</td>
+                                        <td class="py-2 px-4" data-label="Assessment Date">August 26, 2025</td>
+                                        <td class="text-center py-2 px-4" data-label="Subjects Enrolled">6</td>
+                                        <td class="py-2 px-4" data-label="Permits">
+                                            <div class="flex justify-center items-center gap-x-2">
+                                                                                                    <a href="generate_permit.php?assessment_id=51&type=prelim" target="_blank" class="text-xs bg-gray-200 text-gray-700 font-bold py-1 px-2 rounded hover:bg-gray-300">Prelim</a>
+                                                                                                                                                    <a href="generate_permit.php?assessment_id=51&type=midterm" target="_blank" class="text-xs bg-gray-200 text-gray-700 font-bold py-1 px-2 rounded hover:bg-gray-300">Midterm</a>
+                                                                                                                                                    <a href="generate_permit.php?assessment_id=51&type=final" target="_blank" class="text-xs bg-gray-200 text-gray-700 font-bold py-1 px-2 rounded hover:bg-gray-300">Finals</a>
+                                                                                            </div>
+                                        </td>
+                                        <td class="text-center py-2 px-4" data-label="Actions">
+                                            <div class="flex justify-center items-center gap-x-4 text-lg">
+                                                <button type="button" class="view-schedule-btn text-gray-400 hover:text-green-600" title="View Class Links" data-assessment-id="51"><i class="fas fa-video"></i></button>
+                                                <button type="button" class="view-assessment-btn text-gray-400 hover:text-blue-600" title="View Assessment" data-assessment-id="51"><i class="fas fa-eye"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="payments" class="content-panel p-6 hidden">
+                                    <div class="space-y-4">
+                                                                                <div class="border rounded-lg bg-white shadow-sm">
+                                <button class="accordion-header w-full p-4 text-left focus:outline-none">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h3 class="font-bold text-lg text-gray-800">A.Y. 2025-26 - 3rd Trimester</h3>
+                                            <div class="text-sm text-gray-500 mt-1 space-x-4">
+                                                <span>Total Payable: <strong class="text-gray-700">₱28,548.50</strong></span>
+                                                <span>Total Paid: <strong class="text-gray-700">₱5,000.00</strong></span>
+                                                <span>Balance: <strong class="text-red-600">₱23,548.50</strong></span>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                                    </div>
+                                </button>
+                                <div class="accordion-body hidden border-t p-4">
+                                     <div class="flex justify-end mb-4 gap-2">
+                                        <a href="print_statement.php?assessment_id=276" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md text-sm"><i class="fas fa-print mr-2"></i>Print Statement</a>
+                                    </div>
+                                    <table class="min-w-full text-sm responsive-table">
+                                        <thead class="bg-gray-50"><tr><th class="text-left py-2 px-3">Payment Date</th><th class="text-left py-2 px-3">O.R. Number</th><th class="text-right py-2 px-3">Amount Paid</th><th class="text-left py-2 px-3">Encoded By</th><th class="text-center py-2 px-3">Actions</th></tr></thead>
+                                        <tbody>
+                                                                                            <tr class="border-b">
+                                                    <td class="py-2 px-3" data-label="Payment Date">May 4, 2026</td>
+                                                    <td class="py-2 px-3 font-mono" data-label="O.R. Number">0</td>
+                                                    <td class="text-right py-2 px-3 font-semibold" data-label="Amount Paid">₱5,000.00</td>
+                                                    <td class="py-2 px-3" data-label="Encoded By">Administrator</td>
+                                                    <td class="text-center py-2 px-3" data-label="Actions">
+                                                        <a href="print_receipt.php?payment_id=588" target="_blank" class="text-blue-500 hover:underline" title="Print Receipt"><i class="fas fa-print"></i></a>
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b"><td colspan="5" class="py-2 px-3 bg-gray-50 text-xs"><strong class="text-gray-600">Notes:</strong> <span class="text-gray-800 italic">SY2025-26 3rd Trimester Initial Payment BDO Ref. No. PC-NDBWEB-20260430-34396098</span></td></tr>                                                                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                                                                                <div class="border rounded-lg bg-white shadow-sm">
+                                <button class="accordion-header w-full p-4 text-left focus:outline-none">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h3 class="font-bold text-lg text-gray-800">A.Y. 2025-26 - 2nd Trimester</h3>
+                                            <div class="text-sm text-gray-500 mt-1 space-x-4">
+                                                <span>Total Payable: <strong class="text-gray-700">₱34,398.50</strong></span>
+                                                <span>Total Paid: <strong class="text-gray-700">₱12,039.47</strong></span>
+                                                <span>Balance: <strong class="text-red-600">₱22,359.03</strong></span>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                                    </div>
+                                </button>
+                                <div class="accordion-body hidden border-t p-4">
+                                     <div class="flex justify-end mb-4 gap-2">
+                                        <a href="print_statement.php?assessment_id=186" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md text-sm"><i class="fas fa-print mr-2"></i>Print Statement</a>
+                                    </div>
+                                    <table class="min-w-full text-sm responsive-table">
+                                        <thead class="bg-gray-50"><tr><th class="text-left py-2 px-3">Payment Date</th><th class="text-left py-2 px-3">O.R. Number</th><th class="text-right py-2 px-3">Amount Paid</th><th class="text-left py-2 px-3">Encoded By</th><th class="text-center py-2 px-3">Actions</th></tr></thead>
+                                        <tbody>
+                                                                                            <tr class="border-b">
+                                                    <td class="py-2 px-3" data-label="Payment Date">January 12, 2026</td>
+                                                    <td class="py-2 px-3 font-mono" data-label="O.R. Number">0</td>
+                                                    <td class="text-right py-2 px-3 font-semibold" data-label="Amount Paid">₱12,039.47</td>
+                                                    <td class="py-2 px-3" data-label="Encoded By">Administrator</td>
+                                                    <td class="text-center py-2 px-3" data-label="Actions">
+                                                        <a href="print_receipt.php?payment_id=338" target="_blank" class="text-blue-500 hover:underline" title="Print Receipt"><i class="fas fa-print"></i></a>
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b"><td colspan="5" class="py-2 px-3 bg-gray-50 text-xs"><strong class="text-gray-600">Notes:</strong> <span class="text-gray-800 italic">SY2025-26 2nd Trimester Initial Payment</span></td></tr>                                                                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                                                                                <div class="border rounded-lg bg-white shadow-sm">
+                                <button class="accordion-header w-full p-4 text-left focus:outline-none">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h3 class="font-bold text-lg text-gray-800">A.Y. 2025-26 - 1st Trimester</h3>
+                                            <div class="text-sm text-gray-500 mt-1 space-x-4">
+                                                <span>Total Payable: <strong class="text-gray-700">₱32,148.50</strong></span>
+                                                <span>Total Paid: <strong class="text-gray-700">₱32,149.00</strong></span>
+                                                <span>Balance: <strong class="text-green-600">₱-0.50</strong></span>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                                    </div>
+                                </button>
+                                <div class="accordion-body hidden border-t p-4">
+                                     <div class="flex justify-end mb-4 gap-2">
+                                        <a href="print_statement.php?assessment_id=51" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md text-sm"><i class="fas fa-print mr-2"></i>Print Statement</a>
+                                    </div>
+                                    <table class="min-w-full text-sm responsive-table">
+                                        <thead class="bg-gray-50"><tr><th class="text-left py-2 px-3">Payment Date</th><th class="text-left py-2 px-3">O.R. Number</th><th class="text-right py-2 px-3">Amount Paid</th><th class="text-left py-2 px-3">Encoded By</th><th class="text-center py-2 px-3">Actions</th></tr></thead>
+                                        <tbody>
+                                                                                            <tr class="border-b">
+                                                    <td class="py-2 px-3" data-label="Payment Date">August 30, 2025</td>
+                                                    <td class="py-2 px-3 font-mono" data-label="O.R. Number">0</td>
+                                                    <td class="text-right py-2 px-3 font-semibold" data-label="Amount Paid">₱11,252.00</td>
+                                                    <td class="py-2 px-3" data-label="Encoded By">Administrator</td>
+                                                    <td class="text-center py-2 px-3" data-label="Actions">
+                                                        <a href="print_receipt.php?payment_id=59" target="_blank" class="text-blue-500 hover:underline" title="Print Receipt"><i class="fas fa-print"></i></a>
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b"><td colspan="5" class="py-2 px-3 bg-gray-50 text-xs"><strong class="text-gray-600">Notes:</strong> <span class="text-gray-800 italic">SY2025-26 1st Trimester Initial Payment</span></td></tr>                                                                                            <tr class="border-b">
+                                                    <td class="py-2 px-3" data-label="Payment Date">December 1, 2025</td>
+                                                    <td class="py-2 px-3 font-mono" data-label="O.R. Number">0</td>
+                                                    <td class="text-right py-2 px-3 font-semibold" data-label="Amount Paid">₱13,931.00</td>
+                                                    <td class="py-2 px-3" data-label="Encoded By">Administrator</td>
+                                                    <td class="text-center py-2 px-3" data-label="Actions">
+                                                        <a href="print_receipt.php?payment_id=229" target="_blank" class="text-blue-500 hover:underline" title="Print Receipt"><i class="fas fa-print"></i></a>
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b"><td colspan="5" class="py-2 px-3 bg-gray-50 text-xs"><strong class="text-gray-600">Notes:</strong> <span class="text-gray-800 italic">SY2025-26 1st Trimester Prelim &amp; Midterm Payment</span></td></tr>                                                                                            <tr class="border-b">
+                                                    <td class="py-2 px-3" data-label="Payment Date">December 27, 2025</td>
+                                                    <td class="py-2 px-3 font-mono" data-label="O.R. Number">0</td>
+                                                    <td class="text-right py-2 px-3 font-semibold" data-label="Amount Paid">₱6,966.00</td>
+                                                    <td class="py-2 px-3" data-label="Encoded By">Administrator</td>
+                                                    <td class="text-center py-2 px-3" data-label="Actions">
+                                                        <a href="print_receipt.php?payment_id=274" target="_blank" class="text-blue-500 hover:underline" title="Print Receipt"><i class="fas fa-print"></i></a>
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-b"><td colspan="5" class="py-2 px-3 bg-gray-50 text-xs"><strong class="text-gray-600">Notes:</strong> <span class="text-gray-800 italic">SY2025-26 1st Trimester  Finals Payment</span></td></tr>                                                                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                                            </div>
+                            </div>
+            <div id="grades" class="content-panel p-6 hidden">
+                <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md mb-6" role="alert">
+                    <div class="flex">
+                        <div>
+                            <p class="font-bold"><i class="fas fa-info-circle mr-3"></i> Important Notice</p>
+                            <p class="text-sm" style="text-align: justify;">
+                                We have commenced the integration of historical grade records for former students into the system. At this stage, grades will temporarily appear as “locked,” with only the corresponding remarks visible. The actual grades will be made available progressively as the integration continues, Please check your account periodically to see if your records have been updated.
+                                This process also involves the verification of prior assessment and financial records; therefore, we kindly request your patience while these updates are finalized. Thank you for your understanding and cooperation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end mb-4">
+                    <a href="api_generate_grades_pdf.php?student_id=53" target="_blank" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md text-sm">
+                        <i class="fas fa-file-pdf mr-2"></i>Download as PDF
+                    </a>
+                </div>
+
+                <form action="admin_page.php?page=student_profile&id=53" method="post">
+                    <input type="hidden" name="student_id" value="53">
+                    <div id="grades-printable-area">
+                    <div class="space-y-4">
+                                            <div class="course-accordion bg-white rounded-lg"><div class="p-4">
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    1st Year, 1st Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC111</td>
+                                        <td class="py-3 px-4 font-semibold">Understanding the Self</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC112</td>
+                                        <td class="py-3 px-4 font-semibold">Mathematics in the Modern World</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE111</td>
+                                        <td class="py-3 px-4 font-semibold">Introduction to Computing</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE112</td>
+                                        <td class="py-3 px-4 font-semibold">Computer Programming 1</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">NSTP111</td>
+                                        <td class="py-3 px-4 font-semibold">National Service Training Program 1</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">PE111</td>
+                                        <td class="py-3 px-4 font-semibold">Physical Education 1</td>
+                                        <td class="py-3 px-4 text-center">2.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    1st Year, 2nd Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC113</td>
+                                        <td class="py-3 px-4 font-semibold">Contemporary World</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC114</td>
+                                        <td class="py-3 px-4 font-semibold">Science, Technology and Society</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC111</td>
+                                        <td class="py-3 px-4 font-semibold">System Data Structures and Algorithms</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE113</td>
+                                        <td class="py-3 px-4 font-semibold">Computer Programming 2</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">NSTP121</td>
+                                        <td class="py-3 px-4 font-semibold">National Service Training Program 2</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">PE121</td>
+                                        <td class="py-3 px-4 font-semibold">Physical Education 2</td>
+                                        <td class="py-3 px-4 text-center">2.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    1st Year, 3rd Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC115</td>
+                                        <td class="py-3 px-4 font-semibold">IS Ethics</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC116</td>
+                                        <td class="py-3 px-4 font-semibold">Purposive Communication</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEE131</td>
+                                        <td class="py-3 px-4 font-semibold">Filipino 1</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        P                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Credited</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC112</td>
+                                        <td class="py-3 px-4 font-semibold">Understanding Cyber warfare</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE114</td>
+                                        <td class="py-3 px-4 font-semibold">Introduction to Linux Operating System</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">PE131</td>
+                                        <td class="py-3 px-4 font-semibold">Physical Education 3</td>
+                                        <td class="py-3 px-4 text-center">2.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.50                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    2nd Year, 1st Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEE132</td>
+                                        <td class="py-3 px-4 font-semibold">Filipino 2</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC113</td>
+                                        <td class="py-3 px-4 font-semibold">Business Continuity Planning</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC114</td>
+                                        <td class="py-3 px-4 font-semibold">IT Infrastructure and Network Technologies</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE115</td>
+                                        <td class="py-3 px-4 font-semibold">Fundamentals of Information Systems and Security</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE116</td>
+                                        <td class="py-3 px-4 font-semibold">System Analysis and Design</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">PE141</td>
+                                        <td class="py-3 px-4 font-semibold">Physical Education 4</td>
+                                        <td class="py-3 px-4 text-center">2.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    2nd Year, 2nd Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC117</td>
+                                        <td class="py-3 px-4 font-semibold">The Life and Works of Rizal</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">IDM111</td>
+                                        <td class="py-3 px-4 font-semibold">Organization and Management Concepts</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC115</td>
+                                        <td class="py-3 px-4 font-semibold">Network Enterprise Architecture</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC116</td>
+                                        <td class="py-3 px-4 font-semibold">Introduction to Digital Forensics</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC117</td>
+                                        <td class="py-3 px-4 font-semibold">Secure Computer  User</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        2.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE117</td>
+                                        <td class="py-3 px-4 font-semibold">Information Management</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        2.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    2nd Year, 3rd Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC118</td>
+                                        <td class="py-3 px-4 font-semibold">Readings in Philippine History</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">IDM112</td>
+                                        <td class="py-3 px-4 font-semibold">Financial Management</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC118</td>
+                                        <td class="py-3 px-4 font-semibold">Ethical Hacking</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        2.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC119</td>
+                                        <td class="py-3 px-4 font-semibold">Information Systems Security</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC120</td>
+                                        <td class="py-3 px-4 font-semibold">Shell Scripting</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ITE118</td>
+                                        <td class="py-3 px-4 font-semibold">Application Development and Emerging Technologies</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    3rd Year, 1st Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">GEC119</td>
+                                        <td class="py-3 px-4 font-semibold">Art Appreciation</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.50                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">IDM113</td>
+                                        <td class="py-3 px-4 font-semibold">Evaluation of Business Performance</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC121</td>
+                                        <td class="py-3 px-4 font-semibold">IS Strategy Management and Acquisition</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC122</td>
+                                        <td class="py-3 px-4 font-semibold">Web Penetration Testing</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.00                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC123</td>
+                                        <td class="py-3 px-4 font-semibold">IT Security Risk Management</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.50                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC124</td>
+                                        <td class="py-3 px-4 font-semibold">IT Auditing</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        1.25                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    3rd Year, 2nd Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">IDM114</td>
+                                        <td class="py-3 px-4 font-semibold">Business Process Management</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="text-gray-400 italic" title="Grade is locked">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC125</td>
+                                        <td class="py-3 px-4 font-semibold">Disaster Recovery Planning</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="text-gray-400 italic" title="Grade is locked">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row">
+                                        <td class="py-3 px-4 font-mono">ISC126</td>
+                                        <td class="py-3 px-4 font-semibold">IS Capstone Project 1</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        N/A                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>No Remark</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC127</td>
+                                        <td class="py-3 px-4 font-semibold">IT Security Project Management</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="text-gray-400 italic" title="Grade is locked">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row">
+                                        <td class="py-3 px-4 font-mono">ISC128</td>
+                                        <td class="py-3 px-4 font-semibold">IT Security Laws, Regulation, and Compliance</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        N/A                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>No Remark</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row bg-green-50 text-green-900 font-medium">
+                                        <td class="py-3 px-4 font-mono">ISC129</td>
+                                        <td class="py-3 px-4 font-semibold">Vulnerability Assessment</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="text-gray-400 italic" title="Grade is locked">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>Passed</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    3rd Year, 3rd Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row">
+                                        <td class="py-3 px-4 font-mono">ISC130</td>
+                                        <td class="py-3 px-4 font-semibold">Professional Issues in Information Systems</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        N/A                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>No Remark</span>
+                                                                                    </td>
+                                    </tr>
+                                                                                                        <tr class="subject-row">
+                                        <td class="py-3 px-4 font-mono">ISC131</td>
+                                        <td class="py-3 px-4 font-semibold">IS Capstone Project 2</td>
+                                        <td class="py-3 px-4 text-center">3.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        N/A                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>No Remark</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                    <div class="mb-6 trimester-group">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                                    4th Year, 1st Trimester                                </h3>
+                                <div class="overflow-x-auto border rounded-md">
+                                <table class="min-w-full"><thead class="bg-gray-50"><tr><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Code</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase">Course Title</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase">Units</th><th class="py-2 px-4 text-center text-xs font-medium text-gray-500 uppercase w-32">Grade</th><th class="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase w-48">Remarks</th></tr></thead>
+                                <tbody class="divide-y divide-gray-200">
+                                                                                                        <tr class="subject-row">
+                                        <td class="py-3 px-4 font-mono">ISC132</td>
+                                        <td class="py-3 px-4 font-semibold">On-the-Job Training (minimum of 500 hours)</td>
+                                        <td class="py-3 px-4 text-center">9.0</td>
+                                        <td class="py-2 px-4 text-center">
+                                                                                            
+                                                                                                    <span class="font-semibold">
+                                                        N/A                                                    </span>
+                                                
+                                                                                    </td>
+                                        <td class="py-2 px-4">
+                                                                                            <span>No Remark</span>
+                                                                                    </td>
+                                    </tr>
+                                                                </tbody></table></div></div>
+                                                </div></div>
+                                        </div>
+                    </div>
+                                    </form>
+            </div>
+            <div id="academic-calendar" class="content-panel p-6 hidden">
+                 <p class="text-base font-bold text-red-500 italic mb-4">Click the event to view the full details</p>
+                <div id="myProfileCalendar"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<nav class="mobile-nav">
+    <a href="#enrollment" class="mobile-nav-link active">
+        <i class="fa-solid fa-file text-xl"></i>
+        <span>Enrollment</span>
+    </a>
+    <a href="#payments" class="mobile-nav-link">
+        <i class="fas fa-receipt text-xl"></i>
+        <span>Payments</span>
+    </a>
+    <a href="#grades" class="mobile-nav-link">
+        <i class="fas fa-graduation-cap text-xl"></i>
+        <span>Grades</span>
+    </a>
+    <a href="#academic-calendar" class="mobile-nav-link">
+        <i class="fas fa-calendar-alt text-xl"></i>
+        <span>Calendar</span>
+    </a>
+    <a href="logout_student.php" class="mobile-nav-link">
+        <i class="fas fa-sign-out-alt text-xl"></i>
+        <span>Logout</span>
+    </a>
+</nav>
+
+<div id="view-assessment-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full hidden z-[1001]"><div class="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white"><div id="modal-content-container"></div><div class="flex justify-between items-center mt-6 pt-4 border-t"><div class="flex items-center gap-x-2"><button id="modal-print-btn" type="button" class="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg items-center"><i class="fas fa-print mr-2"></i>Print</button><button id="download-pdf-btn" type="button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center"><i class="fas fa-file-pdf mr-2"></i>Download PDF</button></div><button id="modal-close-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Close</button></div></div></div>
+<div id="view-schedule-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full hidden z-[1001]"><div class="relative top-20 mx-auto p-5 border w-full max-w-6xl shadow-lg rounded-md bg-white"><div class="flex justify-between items-center pb-3 border-b"><p class="text-2xl font-bold text-blue-600">Class Schedule & Links</p><button id="schedule-modal-close-btn" class="cursor-pointer z-50"><i class="fas fa-times text-xl text-gray-500 hover:text-red-600"></i></button></div><div id="schedule-modal-content" class="mt-4"></div></div></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Show session notifications
+    
+    // --- NAVIGATION AND SIDEBAR TOGGLE LOGIC ---
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+    const contentPanels = document.querySelectorAll('.content-panel');
+
+    // Sidebar Toggle for minimize/expand functionality
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            // Toggle the 'sidebar-mini' class on the sidebar element
+            sidebar.classList.toggle('sidebar-mini');
+
+            // Adjust the main content's margin based on the sidebar's state
+            if (sidebar.classList.contains('sidebar-mini')) {
+                mainContent.style.marginLeft = '88px'; // Margin for mini sidebar
+            } else {
+                mainContent.style.marginLeft = '260px'; // Margin for full sidebar
+            }
         });
+    }
 
-        signInStudentButton.addEventListener(&#39;click&#39;, () =&gt; {
-            container.classList.remove(&#34;right-panel-active&#34;);
+    // Unified Navigation Link handler (for both side and bottom nav)
+    navLinks.forEach(link => {
+        if (link.href.includes('logout_student.php')) return;
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href'); 
+            contentPanels.forEach(panel => panel.classList.add('hidden'));
+            document.querySelector(targetId).classList.remove('hidden');
+            navLinks.forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll(`.nav-link[href='${targetId}'], .mobile-nav-link[href='${targetId}']`).forEach(activeLink => {
+                activeLink.classList.add('active');
+            });
+            if (targetId === '#academic-calendar') {
+                initializeCalendar();
+            }
         });
+    });
 
-        document.addEventListener(&#39;DOMContentLoaded&#39;, function () {
-            const passwordInput = document.getElementById(&#39;password&#39;);
-            const togglePasswordButton = document.getElementById(&#39;togglePassword&#39;);
-            const eyeIcon = togglePasswordButton.querySelector(&#39;i&#39;);
-
-            togglePasswordButton.addEventListener(&#39;click&#39;, function () {
-                // Toggle the type attribute
-                const type = passwordInput.getAttribute(&#39;type&#39;) === &#39;password&#39; ? &#39;text&#39; : &#39;password&#39;;
-                passwordInput.setAttribute(&#39;type&#39;, type);
-
-                // Toggle the eye icon class
-                if (type === &#39;password&#39;) {
-                    // If type is password, show the &#39;eye-slash&#39; icon
-                    eyeIcon.classList.remove(&#39;fa-eye&#39;);
-                    eyeIcon.classList.add(&#39;fa-eye-slash&#39;);
-                } else {
-                    // If type is text, show the &#39;eye&#39; icon
-                    eyeIcon.classList.remove(&#39;fa-eye-slash&#39;);
-                    eyeIcon.classList.add(&#39;fa-eye&#39;);
+    let calendarInitialized = false;
+    function initializeCalendar() {
+        if (calendarInitialized) return;
+        calendarInitialized = true;
+        const calendarEl = document.getElementById('myProfileCalendar');
+        const academicEvents = [{"title":"SY2024-25 3rd Trimester FINAL EXAM","start":"2025-08-11","end":"2025-08-18","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"Encoding of Grades for SY2024-25 3rd Trimester","start":"2025-08-18","end":"2025-08-23","backgroundColor":"#ff9500","borderColor":"#ff9500","allDay":true},{"title":"GK College Council Meetings","start":"2025-08-22","end":null,"backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"ENROLLMENT FOR 1ST TERM A.Y 25-26 August 18 to 21","start":"2025-08-18","end":"2025-08-19","backgroundColor":"#d6005d","borderColor":"#d6005d","allDay":true},{"title":"Ninoy Aquino Day","start":"2025-08-21","end":"2025-08-22","backgroundColor":"#ad16e3","borderColor":"#ad16e3","allDay":true},{"title":"National Heroes Day","start":"2025-08-26","end":"2025-08-27","backgroundColor":"#c619d2","borderColor":"#c619d2","allDay":true},{"title":"START OF 1ST TERM A.Y. 2025-2026","start":"2025-09-01","end":"2025-09-07","backgroundColor":"#12b525","borderColor":"#12b525","allDay":true},{"title":"SY2024-25 3rd Trimester MIDTERM EXAM","start":"2025-07-08","end":"2025-07-15","backgroundColor":"#0084ff","borderColor":"#0084ff","allDay":true},{"title":"PRELIM EXAM - SY2025-26 1st Trimester","start":"2025-09-22","end":"2025-09-28","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"MIDTERM EXAM - SY2025-26 1st Trimester","start":"2025-10-27","end":"2025-11-01","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"All Saints\u2019 Day","start":"2025-11-01","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"All Souls\u2019 Day","start":"2025-11-02","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Bonifacio Day","start":"2025-11-30","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"FINALS EXAMS - SY2025-26 1st Trimester","start":"2025-12-01","end":"2025-12-07","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"Immaculate Conception","start":"2025-12-08","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"January 1, 2026","start":"2026-01-01","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Enrollment for 2nd Term \/ Holiday Break","start":"2025-12-15","end":"2026-01-05","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"Start of 2nd Trimester A.Y. 2025-2026","start":"2026-01-05","end":null,"backgroundColor":"#12b525","borderColor":"#12b525","allDay":true},{"title":"Chinese Lunar New Year","start":"2026-01-29","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Preliminary Examination","start":"2026-02-02","end":"2026-02-08","backgroundColor":"#d79637","borderColor":"#d79637","allDay":true},{"title":"Midterm Examination","start":"2026-03-09","end":"2026-03-15","backgroundColor":"#d79b32","borderColor":"#d79b32","allDay":true},{"title":"Eid ul-Fitr (No Classes)","start":"2026-03-20","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Maundy Thursday (No Classes)","start":"2026-04-02","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Good Friday (No Classes)","start":"2026-04-03","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Black Saturday (No Classes)","start":"2026-04-04","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Araw ng Kagitingan (No Classes)","start":"2026-04-09","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"GK College Foundation Day","start":"2026-04-13","end":null,"backgroundColor":"#d79637","borderColor":"#d79637","allDay":true},{"title":"Final Examination","start":"2026-04-06","end":"2026-04-12","backgroundColor":"#d79637","borderColor":"#d79637","allDay":true},{"title":"Encoding of Grades \/ Start of Term Break","start":"2026-04-13","end":"2026-04-19","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"Enrollment for 3rd Term","start":"2026-04-20","end":"2026-04-26","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"Start of 3rd Trimester A.Y. 2025-2026","start":"2026-04-27","end":null,"backgroundColor":"#12b525","borderColor":"#12b525","allDay":true},{"title":"Labor Day","start":"2026-05-01","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Preliminary Examination","start":"2026-05-25","end":"2026-05-31","backgroundColor":"#d79637","borderColor":"#d79637","allDay":true},{"title":"Independence Day","start":"2026-06-12","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Eid ul-Adha","start":"2026-06-26","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"Midterm Examination","start":"2026-06-29","end":"2026-07-05","backgroundColor":"#d79637","borderColor":"#d79637","allDay":true},{"title":"Final Examination","start":"2026-08-03","end":"2026-08-09","backgroundColor":"#d79637","borderColor":"#d79637","allDay":true},{"title":"Encoding of Grades \/ Start of Term Break","start":"2026-08-10","end":"2026-08-16","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"Enrollment for 1st Trimester A.Y. 2026-2027","start":"2026-08-17","end":"2026-08-23","backgroundColor":"#3788d8","borderColor":"#3788d8","allDay":true},{"title":"Start of 1st Trimester A.Y. 2026-2027","start":"2026-08-24","end":null,"backgroundColor":"#12b525","borderColor":"#12b525","allDay":true},{"title":"Chinese New Year Celebration (No Classes)","start":"2026-02-17","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true},{"title":"People's Power Revolution Anniversary (No Classes)","start":"2026-02-25","end":null,"backgroundColor":"#ff0000","borderColor":"#ff0000","allDay":true}];
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listYear' },
+            titleFormat: { year: 'numeric', month: 'short' },
+            height: 'auto',
+            events: academicEvents,
+            initialDate: '2026-05-17',
+            eventClick: function(clickInfo) {
+                clickInfo.jsEvent.preventDefault();
+                const title = clickInfo.event.title;
+                const startDate = clickInfo.event.start;
+                const endDate = clickInfo.event.end;
+                let dateString = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                if (endDate) {
+                    const inclusiveEndDate = new Date(endDate);
+                    inclusiveEndDate.setDate(inclusiveEndDate.getDate() - 1);
+                    if (inclusiveEndDate.toDateString() !== startDate.toDateString()) {
+                        dateString += ' - ' + inclusiveEndDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    }
                 }
+                Swal.fire({ title: `<strong>${title}</strong>`, html: `<p>${dateString}</p>`, icon: 'info', confirmButtonText: 'Close', confirmButtonColor: '#3b82f6' });
+            }
+        });
+        calendar.render();
+    }
+
+
+    // --- Your existing modal and accordion logic (no changes needed) ---
+    const formatter = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+    const allFees = [{"id":"1","fee_name":"TUITION_PER_UNIT","fee_description":"Standard rate charged per lecture or lab unit.","course_code":null,"amount":"1200.00","last_updated":"2025-06-28 10:59:14","is_deletable":"0"},{"id":"5","fee_name":"REG_FEE_INTL_CERT","fee_description":"Registration Fee for (international certification)","course_code":null,"amount":"995.00","last_updated":"2025-06-18 23:30:02","is_deletable":"1"},{"id":"6","fee_name":"LAB_FEE_MACHINE","fee_description":"Laboratory Fee (Machine Use)","course_code":null,"amount":"600.00","last_updated":"2025-06-18 23:27:22","is_deletable":"1"},{"id":"7","fee_name":"ATHLETICS_FEE","fee_description":"Athletics (Virtual\/ Physical)","course_code":null,"amount":"205.00","last_updated":"2025-06-18 23:27:29","is_deletable":"1"},{"id":"8","fee_name":"CHARITY_CIVIC_FEE","fee_description":"Charity & civic fee","course_code":null,"amount":"15.00","last_updated":"2025-06-18 23:27:34","is_deletable":"1"},{"id":"9","fee_name":"COMMUNITY_FEE","fee_description":"Community fee (Virtual\/ Physical)","course_code":null,"amount":"55.00","last_updated":"2025-06-18 23:27:40","is_deletable":"1"},{"id":"10","fee_name":"COMPUTER_DEV_FEE","fee_description":"Computer Dev. fee\/ Online Platform","course_code":null,"amount":"910.00","last_updated":"2025-06-18 23:27:47","is_deletable":"1"},{"id":"11","fee_name":"CULTURAL_FEE","fee_description":"Cultural fee","course_code":null,"amount":"55.00","last_updated":"2025-06-18 23:27:53","is_deletable":"1"},{"id":"12","fee_name":"GENERAL_DEPOSIT_FEE","fee_description":"General deposit fee","course_code":null,"amount":"50.00","last_updated":"2025-06-18 23:28:00","is_deletable":"1"},{"id":"13","fee_name":"GUIDANCE_FEE","fee_description":"Guidance fee (Virtual\/ Physical)","course_code":null,"amount":"410.00","last_updated":"2025-06-18 23:28:05","is_deletable":"1"},{"id":"14","fee_name":"ID_FEE","fee_description":"ID fee","course_code":null,"amount":"160.00","last_updated":"2025-06-18 23:28:10","is_deletable":"1"},{"id":"15","fee_name":"INSTRUCTIONAL_MEDIA_FEE","fee_description":"Instructional Media (Virtual\/ Physical)","course_code":null,"amount":"280.00","last_updated":"2025-06-18 23:28:16","is_deletable":"1"},{"id":"16","fee_name":"INSURANCE_FEE","fee_description":"Insurance","course_code":null,"amount":"600.00","last_updated":"2025-06-18 23:28:22","is_deletable":"1"},{"id":"17","fee_name":"LIBRARY_FEE","fee_description":"Library Fee (Access to Online Subs. \/ Physical)","course_code":null,"amount":"742.50","last_updated":"2025-06-18 23:28:35","is_deletable":"1"},{"id":"18","fee_name":"MEDICAL_DENTAL_FEE","fee_description":"Medical \/Dental (Online Consultation Available)","course_code":null,"amount":"460.00","last_updated":"2025-06-18 23:28:29","is_deletable":"1"},{"id":"19","fee_name":"PUBLICATION_FEE","fee_description":"Publication (Virtual\/ Physical)","course_code":null,"amount":"60.00","last_updated":"2025-06-18 23:28:47","is_deletable":"1"},{"id":"20","fee_name":"SPORTS_INTRAMS_FEE","fee_description":"Sports & Intrams","course_code":null,"amount":"60.00","last_updated":"2025-06-18 23:28:41","is_deletable":"1"},{"id":"21","fee_name":"STUDENT_COUNCIL_FEE","fee_description":"Student council","course_code":null,"amount":"60.00","last_updated":"2025-06-18 23:28:56","is_deletable":"1"},{"id":"22","fee_name":"STUDENT_DEV_FEE","fee_description":"Student Devt. (Virtual\/ Physical)","course_code":null,"amount":"211.00","last_updated":"2025-06-18 23:29:02","is_deletable":"1"},{"id":"23","fee_name":"STUDENT_HANDBOOK_FEE","fee_description":"Student Handbook","course_code":null,"amount":"60.00","last_updated":"2025-06-18 23:27:12","is_deletable":"1"},{"id":"24","fee_name":"TEST_PAPER_FEE","fee_description":"Test paper","course_code":null,"amount":"60.00","last_updated":"2025-06-18 23:26:54","is_deletable":"1"},{"id":"25","fee_name":"LAB_FEE_BFA","fee_description":"Standard laboratory fee for BFA courses.","course_code":"BFA","amount":"1500.00","last_updated":"2025-06-18 23:05:55","is_deletable":"0"},{"id":"26","fee_name":"LAB_FEE_BMA","fee_description":"Standard laboratory fee for BMA courses.","course_code":"BMA","amount":"4500.00","last_updated":"2025-06-18 23:05:55","is_deletable":"0"},{"id":"27","fee_name":"LAB_FEE_BSIS","fee_description":"Standard laboratory fee for BSIS courses.","course_code":"BSIS","amount":"3000.00","last_updated":"2025-06-18 23:23:02","is_deletable":"0"},{"id":"28","fee_name":"LABORATORY_DISCOUNT","fee_description":"Discount multiplier for lab fees. E.g., 0.75 for a 25% discount.","course_code":null,"amount":"0.75","last_updated":"2025-07-02 03:16:12","is_deletable":"0"},{"id":"32","fee_name":"LAB_FEE_BFA BR","fee_description":"Standard laboratory fee for BFA BR courses.","course_code":"BFA BR","amount":"1500.00","last_updated":"2025-07-10 10:50:21","is_deletable":"0"},{"id":"35","fee_name":"LAB_FEE_BSIS BR","fee_description":"Standard laboratory fee for BSIS BR courses.","course_code":"BSIS BR","amount":"3000.00","last_updated":"2025-07-10 10:50:21","is_deletable":"0"},{"id":"41","fee_name":"LAB_FEE_BMA BR","fee_description":"Standard laboratory fee for BMA BR courses.","course_code":"BMA BR","amount":"4500.00","last_updated":"2025-07-10 11:54:40","is_deletable":"0"}];
+    
+    // VIEW ASSESSMENT MODAL LOGIC
+    const viewModal = document.getElementById('view-assessment-modal');
+    const modalContentContainer = document.getElementById('modal-content-container');
+    const viewModalCloseBtn = document.getElementById('modal-close-btn');
+    const printModalBtn = document.getElementById('modal-print-btn');
+    document.querySelectorAll('.view-assessment-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const assessmentId = this.dataset.assessmentId;
+            modalContentContainer.innerHTML = '<p class="text-center py-10">Loading...</p>';
+            viewModal.classList.remove('hidden');
+            fetch(`api_get_assessment.php?assessment_id=${assessmentId}`)
+            .then(response => response.json()).then(data => {
+                let subjectsHTML = '';
+                data.enrolled_subjects.forEach(s => {
+                    const totalUnits = (parseFloat(s.lec_unit) + parseFloat(s.lab_unit)).toFixed(1);
+                    const time = `${new Date('1970-01-01T' + s.time_start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date('1970-01-01T' + s.time_end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                    subjectsHTML += `<tr><td class="p-1">${s.subject_code}</td><td class="p-1">${s.subject_name}</td><td class="p-1 text-center">${totalUnits}</td><td class="p-1">${s.section}</td><td class="p-1">${s.day}</td><td class="p-1">${time}</td><td class="p-1">${s.room}</td></tr>`;
+                });
+                let miscellaneousItemsHTML = '';
+                allFees.filter(f => f.is_deletable == 1).forEach(fee => { miscellaneousItemsHTML += `<div class="flex justify-between text-gray-600"><span>${fee.fee_description}</span><span>${formatter.format(fee.amount)}</span></div>`; });
+                let schemeHTML = '';
+                const payment_mode = data.payment_mode.trim();
+                if (payment_mode === 'Full') { schemeHTML = `<div class="p-3 border rounded-md"><p class="font-bold mb-2">Payment Mode: Full Payment</p><div class="flex justify-between"><span>Discount (${data.discount_rate}%):</span><span class="text-red-600">-${formatter.format(data.total_assessment - data.net_payable)}</span></div><div class="flex justify-between font-bold text-green-600 border-t pt-1 mt-1"><span>NET PAYABLE:</span><span>${formatter.format(data.net_payable)}</span></div></div>`; } else if (payment_mode === 'Scholarship') { const discountAmount = data.total_assessment - data.net_payable; const netPayable = parseFloat(data.net_payable); const initialPayment = parseFloat(data.initial_payment); const remaining = netPayable - initialPayment; const periodicPayment = remaining > 0 ? remaining / 3 : 0; schemeHTML = `<div class="p-3 border rounded-md"><p class="font-bold mb-2">Payment Mode: Scholarship Program</p><div class="space-y-1"><div class="flex justify-between text-red-600"><span>Discount (${data.discount_rate}%):</span><span>-${formatter.format(discountAmount)}</span></div><hr class="my-2"><div class="flex justify-between"><span>Initial Payment:</span><span>${formatter.format(initialPayment)}</span></div><div class="flex justify-between"><span>Prelim Payment:</span><span>${formatter.format(periodicPayment)}</span></div><div class="flex justify-between"><span>Midterm Payment:</span><span>${formatter.format(periodicPayment)}</span></div><div class="flex justify-between"><span>Finals Payment:</span><span>${formatter.format(periodicPayment)}</span></div><div class="flex justify-between font-bold text-green-600 border-t pt-1 mt-1"><span>Total Payable:</span><span>${formatter.format(netPayable)}</span></div></div></div>`; } else { const totalAssessment = parseFloat(data.total_assessment); const initialPayment = parseFloat(data.initial_payment); const remaining = totalAssessment - initialPayment; const periodicPayment = remaining > 0 ? remaining / 3 : 0; schemeHTML = `<div class="p-3 border rounded-md"><p class="font-bold mb-2">Payment Mode: Installment</p><div class="space-y-1"><div class="flex justify-between"><span>Initial Payment:</span><span>${formatter.format(initialPayment)}</span></div><div class="flex justify-between"><span>Prelim Payment:</span><span>${formatter.format(periodicPayment)}</span></div><div class="flex justify-between"><span>Midterm Payment:</span><span>${formatter.format(periodicPayment)}</span></div><div class="flex justify-between"><span>Finals Payment:</span><span>${formatter.format(periodicPayment)}</span></div><div class="flex justify-between font-bold border-t pt-1 mt-1"><span>Total Payable:</span><span>${formatter.format(totalAssessment)}</span></div></div></div>`; }
+                modalContentContainer.innerHTML = `<div id="printable-area" class="overflow-x-auto">
+                    <div style="min-width: 800px;">
+                        <div class="flex items-center justify-center mb-4 space-x-4"><img src="../img/logo.png" alt="School Logo" class="h-16 w-auto" onerror="this.style.display='none'">
+                        <div class="text-left"><h2 class="text-xl font-bold">GK COLLEGE OF BUSINESS, ARTS, AND TECHNOLOGY</h2><p class="text-xs">GLOBALKNOWLEDGE 677 BONI AVE. COR. ALIW ST. MANDALUYONG CITY PHILIPPINES</p>
+                        <p class="text-xs">Tel. No. (02) 657.3091 | 721.4380 | (+63) 916.2921470</p></div></div><div class="grid grid-cols-2 gap-x-4 border-t border-b py-2 text-sm"><div>
+                        <p><strong>Student Name:</strong> TAHAJID, THIRMIZI</p><p><strong>Program:</strong> BSIS</p><p><strong>Academic Year:</strong> ${data.school_year}</p></div>
+                        <div><p><strong>Student Number:</strong> GKC20250053</p><p><strong>Trimester:</strong> ${data.trimester}${data.trimester == 1 ? 'st' : (data.trimester == 2 ? 'nd' : (data.trimester == 3 ? 'rd' : 'th'))} Trimester</p><p><strong>Status:</strong> ${data.status}</p></div></div>
+                        <div class="mt-4"><table class="min-w-full text-sm"><thead class="bg-gray-100"><tr><th class="p-2 text-left">Code</th><th class="p-2 text-left">Course Title</th><th class="p-2 text-center">Unit</th><th class="p-2 text-left">Section</th><th class="p-2 text-left">Day</th><th class="p-2 text-left">Time</th><th class="p-2 text-left">Room</th></tr></thead>
+                        <tbody>${subjectsHTML}</tbody></table></div><div class="grid grid-cols-2 gap-x-8 mt-4 border-t pt-4">
+                        <div class="text-sm space-y-2"><div class="flex justify-between font-semibold"><span>Tuition Fee:</span><span>${formatter.format(data.total_tuition_fee)}</span></div>
+                        <div class="flex justify-between"><span>Laboratory Fees:</span><span>${formatter.format(data.total_lab_fee)}</span></div><div><div class="flex justify-between"><span>Miscellaneous Fees:</span></div>
+                        <div class="pl-4 border-l-2 border-gray-100 ml-2 mt-1 space-y-1">${miscellaneousItemsHTML || '<div class="text-gray-500">No fees.</div>'}</div></div>
+                        <div class="flex justify-between font-bold text-xl border-t mt-2 pt-2"><span>Total Assessment:</span><span>${formatter.format(data.total_assessment)}</span></div></div>
+                        <div class="text-sm space-y-2">${schemeHTML}</div></div>
+                        
+                        <div class="mt-8 px-4 py-4 border-t border-gray-300 text-sm leading-relaxed">
+                            <p class="font-semibold italic">Note: Class schedule is subject to change</p>
+                            <p class="font-bold text-xl italic">Policy on School Charges and Refund of Fees</p>
+                            <p>Officially Enrolled Students who will withdraw their enrollment within the first two weeks of a term from the official start of classes shall be charged as follows:</p>
+                            <ul class="list-disc list-inside mt-2 ml-8">
+                                <li>Within first week after start of classes – <strong>20%</strong> of total school fees.</li>
+                                <li>Within second week – <strong>50%</strong> of total school fees.</li>
+                                <li>After the second week – <strong>100%</strong> of total school fees.</li>
+                            </ul>
+                            <p class="mt-4">Officially Enrolled Students who will withdraw their enrollment before the official start of classes shall be charged a withdrawal fee of <strong>two thousand five hundred pesos (PHP 2,500.00)</strong>.</p>
+                        </div>
+                    </div>
+                </div>`;
+            }).catch(error => { console.error('Fetch error:', error); });
+        });
+    });
+    if(viewModalCloseBtn) { viewModalCloseBtn.addEventListener('click', () => viewModal.classList.add('hidden')); }
+    if(printModalBtn) { printModalBtn.addEventListener('click', () => { const printableArea = document.getElementById('printable-area'); if (printableArea) { const contentToPrint = printableArea.innerHTML; const printWindow = window.open('', '', 'height=800,width=1000'); printWindow.document.write('<html><head><title>Print Assessment</title><script src="https://cdn.tailwindcss.com"><\/script><style>@page { size: auto; margin: 0.25in; } body { margin: 0; }</style></head><body class="p-4">'); printWindow.document.write(contentToPrint); printWindow.document.write('</body></html>'); printWindow.document.close(); printWindow.focus(); setTimeout(() => { printWindow.print(); printWindow.close(); }, 250); } }); }
+
+    // --- START: NEW PDF DOWNLOAD LOGIC ---
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
+    if(downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', () => {
+            const originalContent = document.querySelector('#printable-area > div[style*="min-width"]');
+            if (!originalContent) {
+                Swal.fire('Error!', 'Could not find the content to download.', 'error');
+                return;
+            }
+            
+            // Use PHP variables for a reliable filename
+            const studentName = 'TAHAJID_THIRMIZI';
+            const studentNumber = 'GKC20250053';
+            const filename = `Assessment_${studentNumber}_${studentName}.pdf`;
+
+            Swal.fire({
+                title: 'Generating PDF',
+                text: 'Please wait...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            const renderContainer = document.createElement('div');
+            renderContainer.style.position = 'absolute';
+            renderContainer.style.left = '0';
+            renderContainer.style.top = '-9999px';
+            renderContainer.style.width = '1100px';
+
+            const clonedContent = originalContent.cloneNode(true);
+            renderContainer.appendChild(clonedContent);
+            document.body.appendChild(renderContainer);
+
+            html2canvas(clonedContent, {
+                scale: 2,
+                useCORS: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+
+                const pageWidth_mm = 215.9;
+                const pageHeight_mm = 355.6;
+                const margin_mm = 6.35;
+
+                const contentWidth_mm = pageWidth_mm - (margin_mm * 2);
+                const aspectRatio = canvas.width / canvas.height;
+                const contentHeight_mm = contentWidth_mm / aspectRatio;
+
+                const doc = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'legal'
+                });
+
+                doc.addImage(imgData, 'PNG', margin_mm, margin_mm, contentWidth_mm, contentHeight_mm);
+                doc.save(filename);
+                Swal.close();
+
+            }).catch(err => {
+                console.error('PDF Generation Error:', err);
+                Swal.fire('Error!', 'Could not generate the PDF.', 'error');
+            }).finally(() => {
+                document.body.removeChild(renderContainer);
             });
         });
+    }
+    // --- END: NEW PDF DOWNLOAD LOGIC ---
 
-        // --- NEW: Logic for the STUDENT password toggle ---
-        const studentPasswordInput = document.getElementById(&#39;student_password&#39;);
-        const toggleStudentPasswordButton = document.getElementById(&#39;toggleStudentPassword&#39;);
+    // SCHEDULE MODAL LOGIC
+    const scheduleModal = document.getElementById('view-schedule-modal');
+    const scheduleModalContent = document.getElementById('schedule-modal-content');
+    const scheduleModalCloseBtn = document.getElementById('schedule-modal-close-btn');
+    document.querySelectorAll('.view-schedule-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const assessmentId = this.dataset.assessmentId;
+            scheduleModalContent.innerHTML = '<p class="text-center py-10">Loading...</p>';
+            scheduleModal.classList.remove('hidden');
+            fetch(`api_get_schedule_links.php?assessment_id=${assessmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error || data.length === 0) {
+                        scheduleModalContent.innerHTML = `<p class="text-center py-10 text-gray-500">No scheduled classes found.</p>`;
+                        return;
+                    }
+                    
+                    // --- FINAL, CLEANED-UP TABLE STRUCTURE ---
+                    let tableHTML = `
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm responsive-table">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="py-2 px-3 text-left">Code</th>
+                                        <th class="py-2 px-3 text-left">Subject Name</th>
+                                        <th class="py-2 px-3 text-left">Day</th>
+                                        <th class="py-2 px-3 text-left">Time</th>
+                                        <th class="py-2 px-3 text-left">Instructor</th>
+                                        <th class="py-2 px-3 text-left">Email</th>
+                                        <th class="py-2 px-3 text-center">Meet Link</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                    
+                    data.forEach(subject => {
+                        const timeString = `${new Date('1970-01-01T' + subject.time_start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date('1970-01-01T' + subject.time_end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        let meetLinkHtml = '<span class="text-gray-400">N/A</span>';
+                        if (subject.google_meet_link) {
+                            meetLinkHtml = `<a href="${subject.google_meet_link}" target="_blank" class="text-green-600 hover:text-green-800" title="Join Meeting">JOIN CLASS <i class="fa-solid fa-video"></i></a>`;
+                        }
 
-        // Check if the student elements actually exist before adding listener
-        if (studentPasswordInput &amp;&amp; toggleStudentPasswordButton) {
-            const studentEyeIcon = toggleStudentPasswordButton.querySelector(&#39;i&#39;);
+                        // --- 2. Each piece of data is now in its own <td> cell ---
+                        // This works perfectly for both desktop columns and mobile card rows.
+                        tableHTML += `<tr class="border-b">
+                            <td class="py-3 px-3 font-mono" data-label="Code">${subject.subject_code}</td>
+                            <td class="py-3 px-3 font-semibold" data-label="Subject Name">${subject.subject_name}</td>
+                            <td class="py-3 px-3" data-label="Day">${subject.day}</td>
+                            <td class="py-3 px-3" data-label="Time">${timeString}</td>
+                            <td class="py-3 px-3" data-label="Instructor">${subject.instructor_full_name || 'TBA'}</td>
+                            <td class="py-3 px-3" data-label="Email">${subject.instructor_email || 'N/A'}</td>
+                            <td class="py-3 px-3 text-center" data-label="Meet Link">${meetLinkHtml}</td>
+                        </tr>`;
+                    });
+                    scheduleModalContent.innerHTML = tableHTML + '</tbody></table></div>';
+                }).catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        });
+    });
+    if (scheduleModalCloseBtn) { scheduleModalCloseBtn.addEventListener('click', () => scheduleModal.classList.add('hidden')); }
 
-            toggleStudentPasswordButton.addEventListener(&#39;click&#39;, function () {
-                // Toggle the type attribute
-                const type = studentPasswordInput.getAttribute(&#39;type&#39;) === &#39;password&#39; ? &#39;text&#39; : &#39;password&#39;;
-                studentPasswordInput.setAttribute(&#39;type&#39;, type);
+    // ACCORDION SCRIPT
+    document.querySelectorAll('.accordion-header').forEach(button => {
+        button.addEventListener('click', () => {
+            button.nextElementSibling.classList.toggle('hidden');
+            button.querySelector('i.fa-chevron-down').classList.toggle('rotate-180');
+        });
+    });
+});
+</script>
 
-                // Toggle the eye icon class
-                if (type === &#39;password&#39;) {
-                    studentEyeIcon.classList.remove(&#39;fa-eye&#39;);
-                    studentEyeIcon.classList.add(&#39;fa-eye-slash&#39;);
-                } else {
-                    studentEyeIcon.classList.remove(&#39;fa-eye-slash&#39;);
-                    studentEyeIcon.classList.add(&#39;fa-eye&#39;);
-                }
-            });
-        }
-
-        // --- NEW: Logic for the MOBILE switch links ---
-        const mobileSwitchToStaff = document.getElementById(&#39;mobile-switch-to-staff&#39;);
-        const mobileSwitchToStudent = document.getElementById(&#39;mobile-switch-to-student&#39;);
-
-        if (mobileSwitchToStaff) {
-            mobileSwitchToStaff.addEventListener(&#39;click&#39;, (e) =&gt; {
-                e.preventDefault();
-                container.classList.add(&#34;right-panel-active&#34;);
-            });
-        }
-
-        if (mobileSwitchToStudent) {
-            mobileSwitchToStudent.addEventListener(&#39;click&#39;, (e) =&gt; {
-                e.preventDefault();
-                container.classList.remove(&#34;right-panel-active&#34;);
-            });
-        }
-    </script>
-  </body>
+</body>
 </html>

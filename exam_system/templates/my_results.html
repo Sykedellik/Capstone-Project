@@ -15,21 +15,11 @@
                 Review your exam performance, timing details, and integrity metrics.
             </p>
         </div>
-        <a href="{% url 'student_dashboard' %}" class="btn-secondary">
+        <a href="{% url 'student_dashboard' %}" class="btn-secondary" onclick="smartBack(this); return false;">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            <span>Back to Dashboard</span>
+            <span>Back</span>
         </a>
     </section>
-
-    {% if messages %}
-    <div class="space-y-2">
-        {% for message in messages %}
-        <div class="rounded-md border px-4 py-2 {% if message.tags == 'success' %}border-slate-300 bg-slate-50 text-slate-700{% else %}border-red-200 bg-red-50 text-red-700{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <!-- ─────────────── RESULTS ────────────────────────────────── -->
     {% if results %}

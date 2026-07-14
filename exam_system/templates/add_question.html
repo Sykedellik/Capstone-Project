@@ -11,9 +11,9 @@
             <h1 class="text-h1">{% if exam %}Add Question to {{ exam.title }}{% else %}Create Question{% endif %}</h1>
             <p class="text-body mt-2 max-w-3xl">{% if exam %}Create a new question for {{ exam.subject.name }} and assign it directly to this exam.{% else %}Create a new question and add it to your subject question bank.{% endif %}</p>
         </div>
-        <a href="{% if exam %}{% url 'manage_exam' exam.id %}{% else %}{% url 'question_bank' %}{% endif %}" class="btn-secondary">
+        <a href="{% if exam %}{% url 'manage_exam' exam.id %}{% else %}{% url 'question_bank' %}{% endif %}" class="btn-secondary" onclick="smartBack(this); return false;">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            <span>{% if exam %}Back to Exam{% else %}Back to Question Bank{% endif %}</span>
+            <span>{% if exam %}Back{% else %}Back{% endif %}</span>
         </a>
     </section>
 

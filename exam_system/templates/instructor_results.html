@@ -25,16 +25,6 @@
         </div>
     </section>
 
-    {% if messages %}
-    <div class="space-y-2">
-        {% for message in messages %}
-        <div class="rounded-md border px-4 py-2 {% if message.tags == 'success' %}border-slate-300 bg-slate-50 text-slate-700{% else %}border-red-200 bg-red-50 text-red-700{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
     <!-- Exam Selector -->
     <div class="card">
         <form method="GET" class="flex flex-col gap-4">

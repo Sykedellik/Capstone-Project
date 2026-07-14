@@ -28,9 +28,9 @@
 
         <div class="flex flex-wrap items-center gap-3">
             {% if exam %}
-            <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary">
+            <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary" onclick="smartBack(this); return false;">
                 <i data-lucide="arrow-left" class="h-4 w-4"></i>
-                <span>Back to Exam</span>
+                <span>Back</span>
             </a>
             {% endif %}
             <a href="{% if exam %}{% url 'add_question' %}?exam_id={{ exam.id }}{% elif subject %}{% url 'add_question' %}?subject_id={{ subject.id }}{% else %}{% url 'add_question' %}{% endif %}"

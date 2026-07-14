@@ -18,12 +18,26 @@
             </p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <a href="{% url 'instructor_dashboard' %}" class="btn-secondary">
+            <a href="{% url 'instructor_dashboard' %}" class="btn-secondary" onclick="smartBack(this); return false;">
                 <i data-lucide="arrow-left" class="h-4 w-4"></i>
-                <span>Back to Dashboard</span>
+                <span>Back</span>
             </a>
             <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary" title="Refresh">
                 <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+            </a>
+            <a href="{% url 'archive_exam' exam.id %}"
+               class="btn-secondary"
+               title="Archive Exam"
+               data-confirm
+               data-ajax
+               data-archive-type="exam"
+               data-redirect-referrer
+               data-confirm-title="Archive Exam"
+               data-confirm-message="Archive '{{ exam.title }}'? Students will no longer be able to start it. You can restore it later from the Archive section."
+               data-confirm-label="Archive Exam"
+               data-confirm-color="#64748b">
+                <i data-lucide="archive" class="h-4 w-4"></i>
+                <span>Archive</span>
             </a>
         </div>
     </section>
@@ -66,7 +80,8 @@
                 </div>
                 <div>
                     <label class="field-label">Questions per Student</label>
-                    <input type="number" name="total_questions" value="{{ exam.total_questions }}" min="1" required class="field-input">
+                    <input type="number" name="total_questions" value="{{ exam.total_questions }}" min="1" max="{{ max_questions }}" required class="field-input">
+                    <p class="mt-1 text-xs text-slate-500">Maximum {{ max_questions }} questions per exam.</p>
                 </div>
             </div>
 

@@ -16,9 +16,9 @@
             </p>
         </div>
 
-        <a href="{% url 'instructor_dashboard' %}" class="btn-secondary">
+        <a href="{% url 'instructor_dashboard' %}" class="btn-secondary" onclick="smartBack(this); return false;">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            <span>Back to Dashboard</span>
+            <span>Back</span>
         </a>
     </section>
 
@@ -38,7 +38,7 @@
 
         <div class="space-y-3">
             {% for exam in exams %}
-            <div class="rounded-md border border-slate-200 p-4">
+            <div class="rounded-md border border-slate-200 p-4" id="exam-{{ exam.id }}">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex-1">
                         <div class="flex flex-wrap items-center gap-2 mb-1">
@@ -66,7 +66,7 @@
                             <i data-lucide="settings" class="w-4 h-4"></i>
                             <span>Manage</span>
                         </a>
-                        <a href="{% url 'archive_exam' exam.id %}" class="btn-secondary" title="Archive Exam">
+                        <a href="{% url 'archive_exam' exam.id %}" class="btn-secondary" title="Archive Exam" data-confirm data-ajax data-ajax-item="exam-{{ exam.id }}" data-confirm-title="Archive Exam" data-confirm-message="Archive '{{ exam.title }}'? Students will no longer be able to start it. You can restore it later from the Archive section." data-confirm-label="Archive Exam" data-confirm-color="#64748b">
                             <i data-lucide="archive" class="w-4 h-4"></i>
                         </a>
                         <a href="{% url 'assign_students' %}" class="btn-secondary" title="Assign Students">
@@ -148,9 +148,11 @@
                             name="total_questions"
                             value="10"
                             min="1"
+                            max="{{ max_questions }}"
                             required
                             class="field-input"
                         >
+                        <p class="mt-1 text-xs text-slate-500">Maximum {{ max_questions }} questions per exam.</p>
                     </div>
                 </div>
 

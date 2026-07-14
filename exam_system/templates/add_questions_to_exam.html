@@ -20,7 +20,7 @@
                 Only questions from <strong>{{ exam.subject.name }}</strong> are shown.
             </p>
         </div>
-        <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary">
+        <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary" onclick="smartBack(this); return false;">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
             Back to Exam
         </a>
@@ -92,7 +92,7 @@
         <p class="text-body mt-2 max-w-md mx-auto">
             Every question in <strong>{{ exam.subject.name }}</strong> is already part of this exam.
         </p>
-        <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary mt-5">
+        <a href="{% url 'manage_exam' exam.id %}" class="btn-secondary mt-5" onclick="smartBack(this); return false;">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
             Back to Exam
         </a>

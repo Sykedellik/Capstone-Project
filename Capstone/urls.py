@@ -25,6 +25,9 @@ urlpatterns = [
     path('create-subject/', views.create_subject, name='create_subject'),
     path('edit-subject/<int:subject_id>/', views.edit_subject, name='edit_subject'),
     path('delete-subject/<int:subject_id>/', views.delete_subject, name='delete_subject'),
+    path('archive-subject/<int:subject_id>/', views.archive_subject, name='archive_subject'),
+    path('restore-subject/<int:subject_id>/', views.restore_subject, name='restore_subject'),
+    path('archived-subject/<int:subject_id>/', views.archived_subject, name='archived_subject'),
     path('add-question/', views.add_question, name='add_question'),
     path('question-bank/', views.question_bank, name='question_bank'),
     path('delete-question/<int:question_id>/', views.delete_question, name='delete_question'),
@@ -57,7 +60,6 @@ urlpatterns = [
     path('toggle-exam/<int:exam_id>/', views.toggle_exam, name='toggle_exam'),
     path('archived-exams/', views.archived_exams, name='archived_exams'),
     path('certificate/<int:result_id>/', views.certificate, name='certificate'),
-    path('certificate/<int:result_id>/pdf/', views.certificate_pdf, name='certificate_pdf'),
 ]
 
 if settings.DEBUG:

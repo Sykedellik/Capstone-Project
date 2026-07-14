@@ -3,413 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Secure Exam System</title>
+    <title>Sign in — Secure Examination System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-blue: #1e293b;
-            --primary-hover: #0f172a;
-            --text: #0f172a;
-            --text-muted: #475569;
-            --border: #e2e8f0;
+        :root { --brand-600:#2563eb; --brand-700:#1d4ed8; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        /* Enterprise "Azure/Microsoft" SVG grid background with radial fade */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(148,163,184,.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148,163,184,.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+            -webkit-mask-image: radial-gradient(circle, #000 45%, transparent 90%);
+                    mask-image: radial-gradient(circle, #000 45%, transparent 90%);
+            pointer-events: none;
+            z-index: -5;
         }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            background: #f6f5f7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        /* Subtle, premium blob floats (transform-only, GPU) — depth beneath the grid */
+        @keyframes float1 { to { transform: translate3d(34px, 26px, 0); } }
+        @keyframes float2 { to { transform: translate3d(-26px, -34px, 0); } }
+        @keyframes float3 { to { transform: translate3d(20px, -22px, 0); } }
+
+        /* Card entrance — restrained fade + lift */
+        @keyframes cardEnter {
+            from { opacity: 0; transform: translateY(18px) scale(.985); }
+            to   { opacity: 1; transform: translateY(0)    scale(1); }
         }
-        .container {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-            position: relative;
-            overflow: hidden;
-            max-width: 768px;
-            width: 100%;
-            min-height: 480px;
-            transition: all 0.3s ease-in-out;
-        }
-        .form-container {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            transition: all 0.6s ease-in-out;
-        }
-        .student-container {
-            left: 0;
-            width: 50%;
-            z-index: 2;
-        }
-        .instructor-container {
-            left: 0;
-            width: 50%;
+        .card-enter { animation: cardEnter .5s cubic-bezier(.22,1,.36,1) both; }
+
+        /* Portal/panel reveal — GPU-friendly, reflow-triggered (no rAF stutter) */
+        #login-panel, #portal-selection {
             opacity: 0;
-            z-index: 1;
+            transform: translateY(20px);
+            transition: opacity .35s cubic-bezier(.22,1,.36,1),
+                        transform .35s cubic-bezier(.22,1,.36,1);
+            will-change: opacity, transform;
         }
-        .container.right-panel-active .student-container {
-            transform: translateX(100%);
-        }
-        .container.right-panel-active .instructor-container {
-            transform: translateX(100%);
+        #login-panel.show, #portal-selection.show {
             opacity: 1;
-            z-index: 5;
-            animation: show 0.6s;
+            transform: translateY(0);
         }
-        @keyframes show {
-            0%, 49.99% { opacity: 0; z-index: 1; }
-            50%, 100% { opacity: 1; z-index: 5; }
-        }
-        .overlay-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            transition: transform 0.6s ease-in-out;
-            z-index: 100;
-        }
-        .container.right-panel-active .overlay-container{
-            transform: translateX(-100%);
-        }
-        .container.right-panel-active .overlay {
-            transform: translateX(50%);
-        }
-        .overlay {
-            background: linear-gradient(to right, #3b82f6, #2563eb);
-            color: #FFFFFF;
-            position: relative;
-            left: -100%;
-            height: 100%;
-            width: 200%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
-        }
-        .container.right-panel-active .overlay {
-            background: linear-gradient(to right, #3b82f6, #2563eb);
-        }
-        .overlay-panel {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 40px;
-            text-align: center;
-            top: 0;
-            height: 100%;
-            width: 50%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
-        }
-        .overlay-left {
-            transform: translateX(-20%);
-        }
-        .container.right-panel-active .overlay-left {
-            transform: translateX(0);
-        }
-        .overlay-right {
-            right: 0;
-            transform: translateX(0);
-        }
-        .container.right-panel-active .overlay-right {
-            transform: translateX(20%);
-        }
-        form {
-            background-color: #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 50px;
-            height: 100%;
-            text-align: center;
-        }
-        .form-field {
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        .form-input {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 12px 15px;
-            margin: 8px 0;
-            width: 100%;
-            border-radius: 8px;
-            font-size: 1rem;
-            color: var(--text);
-            outline: none;
-            transition: all 0.2s;
-        }
-        .form-input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.3);
-        }
-        .password-wrapper {
-            position: relative;
-            width: 100%;
-        }
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            padding: 4px;
-        }
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            border: none;
-            border-radius: 0.75rem;
-            padding: 0.875rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
-        }
-        .btn-ghost {
-            background-color: transparent;
-            border: 1px solid #FFFFFF;
-            border-radius: 9999px;
-            color: #FFFFFF;
-            padding: 0.5rem 2rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-ghost:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .message {
-            border-radius: 0.75rem;
-            padding: 0.875rem 1rem;
-            margin-bottom: 1rem;
-            font-size: 0.875rem;
-            text-align: center;
-        }
-        .message-error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
-        }
-        .message-success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-        @media (max-width: 767px) {
-            .container {
-                max-width: 100%;
-                min-height: 100vh;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            .form-container {
-                height: 50%;
-                width: 100%;
-                left: 0;
-                top: 0;
-            }
-            .overlay-container {
-                width: 100%;
-                height: 50%;
-                left: 0;
-                top: 50%;
-                transition: transform 0.6s ease-in-out;
-            }
-            .instructor-container {
-                opacity: 0;
-                z-index: 1;
-            }
-            .container.right-panel-active .overlay-container {
-                transform: translateY(-100%);
-            }
-            .container.right-panel-active .student-container,
-            .container.right-panel-active .instructor-container {
-                transform: translateY(100%);
-            }
-            .container.right-panel-active .instructor-container {
-                opacity: 1;
-                z-index: 5;
-                animation: show 0.6s;
-            }
-            .overlay {
-                transform: translateY(0);
-                height: 200%;
-                width: 100%;
-                left: 0;
-                top: 0;
-            }
-            .container.right-panel-active .overlay {
-                transform: translateY(-50%);
-            }
-            .overlay-panel {
-                width: 100%;
-                height: 50%;
-                transform: translateY(0);
-            }
-            form {
-                padding: 0 30px;
+
+        @media (prefers-reduced-motion: reduce) {
+            .card-enter, [class*="blur-"], #login-panel, #portal-selection {
+                animation: none !important; transition: none !important; will-change: auto;
             }
         }
     </style>
 </head>
-<body>
-    <div class="container" id="container">
-        <div class="form-container instructor-container">
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-                <input type="hidden" name="role" value="instructor">
-                <h1 class="text-2xl font-bold text-slate-700 mb-4">Instructor Sign In</h1>
+<body class="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 antialiased flex flex-col">
+
+    <!-- ===== Layered Background — subtle blobs for depth (behind the grid) ===== -->
+    <div class="fixed inset-0 -z-10"
+         style="background:linear-gradient(160deg,#f8fafc 0%,#eef2f7 60%,#e9eef6 100%)"></div>
+    <div class="fixed -z-10 top-[-140px] left-[-110px] w-[440px] h-[440px] rounded-full blur-[70px] opacity-[0.22] mix-blend-multiply"
+         style="background:radial-gradient(circle,#3b82f6,transparent 70%);animation:float1 26s ease-in-out infinite alternate"></div>
+    <div class="fixed -z-10 bottom-[-160px] right-[-90px] w-[400px] h-[400px] rounded-full blur-[70px] opacity-[0.22] mix-blend-multiply"
+         style="background:radial-gradient(circle,#8b5cf6,transparent 70%);animation:float2 30s ease-in-out infinite alternate"></div>
+    <div class="fixed -z-10 top-[18%] left-[14%] w-4 h-4 rounded-full bg-blue-400/25" style="animation:float1 22s ease-in-out infinite alternate"></div>
+    <div class="fixed -z-10 bottom-[24%] right-[20%] w-3 h-3 rounded-full bg-violet-400/25" style="animation:float2 25s ease-in-out infinite alternate"></div>
+    <div class="fixed -z-10 top-[62%] left-[9%] w-2.5 h-2.5 rounded-full bg-blue-300/30" style="animation:float3 28s ease-in-out infinite alternate"></div>
+
+    <!-- ===== Foreground ===== -->
+    <main class="relative z-10 flex-1 flex flex-col">
+
+        <!-- Top: brand lockup + value proposition -->
+        <header class="pt-10 px-6 text-center">
+            <div class="flex flex-col items-center">
+                <div class="grid place-items-center w-[72px] h-[72px] rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
+                    <i data-lucide="shield-check" class="w-9 h-9"></i>
+                </div>
+                <h1 class="mt-5 text-3xl font-bold tracking-tight text-slate-900">Secure Examination System</h1>
+                <p class="text-base text-slate-500 mt-1">Online Assessment Platform</p>
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-slate-600">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="circle-check" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                    <span class="text-base">Secure Authentication</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="circle-check" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                    <span class="text-base">AI Proctoring</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="circle-check" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                    <span class="text-base">Instant Results</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Center: hero login card -->
+        <div class="flex-1 flex items-center justify-center p-6">
+            <div class="card-enter w-full max-w-md rounded-[20px] border border-white/60 p-11
+                        bg-white/70 backdrop-blur-xl backdrop-saturate-150
+                        shadow-[0_30px_60px_rgba(15,23,42,0.12)]">
+
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="message {% if message.tags == 'error' %}message-error{% else %}message-success{% endif %}">
+                        <div class="mb-4 rounded-xl px-4 py-3 text-sm text-center
+                                    {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-600
+                                    {% else %}bg-green-50 border border-green-200 text-green-700{% endif %}">
                             {{ message }}
                         </div>
                     {% endfor %}
                 {% endif %}
 
-                <div class="form-field">
-                    <input type="text" name="username" class="form-input" placeholder="Username" autocomplete="username" required>
-                </div>
-                
-                <div class="form-field">
-                    <div class="password-wrapper">
-                        <input type="password" name="password" id="instructor_password" class="form-input" placeholder="Password" autocomplete="current-password" required>
-                        <button type="button" class="password-toggle" onclick="toggleInstructorPassword()">
-                            <i data-lucide="eye" id="instructor-eye-icon"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn-primary">
-                    <i data-lucide="log-in"></i>
-                    Sign In
-                </button>
-                <p class="text-center text-xs text-gray-500 mt-6">
-                    For account concerns, contact your system administrator.
-                </p>
-            </form>
-        </div>
+                <!-- Portal Selection -->
+                <div id="portal-selection" class="space-y-4 mb-2 show">
+                    <h3 class="text-center text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                        Choose your portal
+                    </h3>
 
-        <div class="form-container student-container">
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-<input type="hidden" name="role" value="student">
-                <h1 class="text-2xl font-bold text-slate-700 mb-4">Student Sign In</h1>
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="message {% if message.tags == 'error' %}message-error{% else %}message-success{% endif %}">
-                            {{ message }}
+                    <button type="button" onclick="selectPortal('student')"
+                            class="portal-card w-full rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:border-blue-500 hover:shadow-md">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                                <i data-lucide="graduation-cap" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900">Student Portal</h4>
+                                <p class="text-sm text-slate-500">Access assigned examinations.</p>
+                            </div>
                         </div>
-                    {% endfor %}
-                {% endif %}
+                    </button>
 
-                <div class="form-field">
-                    <input type="text" name="username" class="form-input" placeholder="Username" autocomplete="username" required>
+                    <button type="button" onclick="selectPortal('instructor')"
+                            class="portal-card w-full rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:border-blue-500 hover:shadow-md">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+                                <i data-lucide="presentation" class="w-6 h-6 text-violet-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900">Instructor Portal</h4>
+                                <p class="text-sm text-slate-500">Create and manage examinations.</p>
+                            </div>
+                        </div>
+                    </button>
                 </div>
-                
-                <div class="form-field">
-                    <div class="password-wrapper">
-                        <input type="password" name="password" id="student_password" class="form-input" placeholder="Password" autocomplete="current-password" required>
-                        <button type="button" class="password-toggle" onclick="toggleStudentPassword()">
-                            <i data-lucide="eye" id="student-eye-icon"></i>
-                        </button>
+
+                <!-- Dynamic Login Panel -->
+                <div id="login-panel" class="hidden">
+                    <button type="button" onclick="showPortalSelection()"
+                            class="mb-4 flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Back to portal selection
+                    </button>
+
+                    <div class="text-center mb-6">
+                        <div id="portal-icon"
+                             class="w-16 h-16 mx-auto rounded-2xl bg-blue-100 flex items-center justify-center">
+                            <i data-lucide="graduation-cap" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                        <h2 id="portal-title" class="mt-4 text-2xl font-bold">Student Portal</h2>
+                        <p id="portal-description" class="text-sm text-slate-500 mt-1">
+                            Access your assigned examinations.
+                        </p>
                     </div>
-                </div>
-                
-                <button type="submit" class="btn-primary">
-                    <i data-lucide="log-in"></i>
-                    Sign In
-                </button>
-                <p class="text-center text-xs text-gray-500 mt-6">
-                    For account concerns, contact your system administrator.
-                </p>
-            </form>
-        </div>
 
-        <div class="overlay-container">
-            <div class="overlay">
-                <div class="overlay-panel overlay-left">
-                    <h1 class="text-3xl font-bold mb-3">Welcome Student!</h1>
-                    <p class="text-sm opacity-90 mb-2">Access your exams and track your progress.</p>
-                    <p class="text-xs opacity-75 mb-6">All accounts are created by administrator.</p>
-                    <button class="btn-ghost" id="signInStudent">Sign In as Student</button>
-                </div>
-                <div class="overlay-panel overlay-right">
-                    <h1 class="text-3xl font-bold mb-3">Hello Instructor!</h1>
-                    <p class="text-sm opacity-90 mb-2">Manage exams, questions, and view results.</p>
-                    <p class="text-xs opacity-75 mb-6">All accounts are created by administrator.</p>
-                    <button class="btn-ghost" id="signInInstructor">Sign In as Instructor</button>
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" id="role-input" value="student">
+
+                        <label class="block text-sm font-medium mb-1.5 text-slate-700">Username</label>
+                        <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3.5 mb-4
+                                    transition focus-within:border-blue-600 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-600/15">
+                            <i data-lucide="user" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                            <input name="username" required autocomplete="username" placeholder="Enter your username"
+                                   class="w-full bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 outline-none">
+                        </div>
+
+                        <label class="block text-sm font-medium mb-1.5 text-slate-700">Password</label>
+                        <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3.5 mb-6
+                                    transition focus-within:border-blue-600 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-600/15">
+                            <i data-lucide="lock" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                            <input type="password" name="password" id="pw" required autocomplete="current-password" placeholder="Enter your password"
+                                   class="w-full bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 outline-none">
+                            <button type="button" onclick="togglePw()" aria-label="Toggle password visibility"
+                                    class="text-slate-400 hover:text-slate-600 transition shrink-0">
+                                <i data-lucide="eye" id="eye"></i>
+                            </button>
+                        </div>
+
+                        <button type="submit"
+                                class="w-full flex items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white
+                                       bg-blue-600 shadow-md transition hover:bg-blue-700 hover:-translate-y-px hover:shadow-lg active:scale-[.98]">
+                            <i data-lucide="log-in" class="w-4 h-4"></i> Sign In
+                        </button>
+
+                        <p class="text-center text-xs text-slate-400 mt-6">
+                            For account concerns, contact your system administrator.
+                        </p>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="relative z-10 text-center text-xs text-slate-400 py-5">
+        © 2026 Secure Examination System. All Rights Reserved.
+    </footer>
 
     <script>
-        const signInInstructorButton = document.getElementById('signInInstructor');
-        const signInStudentButton = document.getElementById('signInStudent');
-        const container = document.getElementById('container');
+        const roleInput = document.getElementById('role-input');
 
-        signInInstructorButton.addEventListener('click', () => {
-            container.classList.add("right-panel-active");
-        });
+        function selectPortal(role) {
+            const isStudent = role === 'student';
+            document.getElementById('portal-selection').style.display = 'none';
 
-        signInStudentButton.addEventListener('click', () => {
-            container.classList.remove("right-panel-active");
-        });
+            const panel = document.getElementById('login-panel');
+            panel.classList.remove('hidden');
+            // Force a reflow so the start state (opacity:0 / translateY) is committed
+            // before adding .show — this prevents the one-frame snap / micro-stutter.
+            void panel.offsetWidth;
+            panel.classList.add('show');
+
+            roleInput.value = role;
+
+            document.getElementById('portal-title').textContent = isStudent ? 'Student Portal' : 'Instructor Portal';
+            document.getElementById('portal-description').textContent =
+                isStudent ? 'Access your assigned examinations.' : 'Create and manage examinations.';
+
+            const iconWrap = document.getElementById('portal-icon');
+            iconWrap.className = isStudent
+                ? 'w-16 h-16 mx-auto rounded-2xl bg-blue-100 flex items-center justify-center'
+                : 'w-16 h-16 mx-auto rounded-2xl bg-violet-100 flex items-center justify-center';
+            iconWrap.innerHTML =
+                `<i data-lucide="${isStudent ? 'graduation-cap' : 'presentation'}" class="w-8 h-8 ${isStudent ? 'text-blue-600' : 'text-violet-600'}"></i>`;
+
+            lucide.createIcons();
+        }
+
+        function showPortalSelection() {
+            const panel = document.getElementById('login-panel');
+            const selection = document.getElementById('portal-selection');
+            panel.classList.remove('show');
+            // Reveal selection after the panel has finished fading out.
+            setTimeout(() => {
+                panel.classList.add('hidden');
+                selection.classList.remove('show');
+                selection.style.display = '';
+                void selection.offsetWidth;
+                selection.classList.add('show');
+            }, 350);
+        }
+
+        function togglePw() {
+            const p = document.getElementById('pw');
+            const e = document.getElementById('eye');
+            p.type = p.type === 'password' ? 'text' : 'password';
+            e.setAttribute('data-lucide', p.type === 'password' ? 'eye' : 'eye-off');
+            lucide.createIcons();
+        }
 
         lucide.createIcons();
-
-        function toggleStudentPassword() {
-            const passwordInput = document.getElementById('student_password');
-            const eyeIcon = document.getElementById('student-eye-icon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                passwordInput.type = 'password';
-                eyeIcon.setAttribute('data-lucide', 'eye');
-            }
-            lucide.createIcons();
-        }
-
-        function toggleInstructorPassword() {
-            const passwordInput = document.getElementById('instructor_password');
-            const eyeIcon = document.getElementById('instructor-eye-icon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                passwordInput.type = 'password';
-                eyeIcon.setAttribute('data-lucide', 'eye');
-            }
-            lucide.createIcons();
-        }
     </script>
 </body>
 </html>

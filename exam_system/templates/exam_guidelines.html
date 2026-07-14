@@ -72,9 +72,9 @@
                 </label>
 
                 <div class="flex gap-3">
-                    <a href="{% url 'available_exams' %}" class="btn-secondary">
+                    <a href="{% url 'available_exams' %}" class="btn-secondary" onclick="smartBack(this); return false;">
                         <i data-lucide="arrow-left" class="h-4 w-4"></i>
-                        <span>Back to Exams</span>
+                        <span>Back</span>
                     </a>
                     <button type="submit" class="btn-primary">
                         <i data-lucide="play-circle" class="h-4 w-4"></i>

@@ -15,21 +15,11 @@
                 Enroll students into your subjects and manage existing enrollments.
             </p>
         </div>
-        <a href="{% url 'instructor_dashboard' %}" class="btn-secondary">
+        <a href="{% url 'instructor_dashboard' %}" class="btn-secondary" onclick="smartBack(this); return false;">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            <span>Back to Dashboard</span>
+            <span>Back</span>
         </a>
     </section>
-
-    {% if messages %}
-    <div class="space-y-3">
-        {% for message in messages %}
-        <div class="rounded-md border px-4 py-3 {% if message.tags == 'success' %}border-green-200 bg-green-50 text-green-800{% elif message.tags == 'error' %}border-red-200 bg-red-50 text-red-800{% else %}border-slate-200 bg-slate-50 text-slate-700{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <!-- ─────────────────── ENROLL FORM ─────────────────────── -->
     <section class="rounded-lg border border-slate-200 bg-white p-5">

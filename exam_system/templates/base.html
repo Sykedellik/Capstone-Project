@@ -66,23 +66,23 @@
             width: var(--sidebar-collapsed);
         }
 
-        .sidebar-mini .nav-label,
-        .sidebar-mini .brand-label,
-        .sidebar-mini .sidebar-footer-label {
+        .sidebar.sidebar-mini .nav-label,
+        .sidebar.sidebar-mini .brand-label,
+        .sidebar.sidebar-mini .sidebar-footer-label {
             display: none;
         }
 
-        .sidebar-mini .nav-link {
+        .sidebar.sidebar-mini .nav-link {
             justify-content: center;
             padding-left: 0.5rem;
             padding-right: 0.5rem;
         }
 
-        .sidebar-mini .nav-link i {
+        .sidebar.sidebar-mini .nav-link i {
             margin-right: 0;
         }
 
-        .sidebar-mini .sidebar-brand {
+        .sidebar.sidebar-mini .sidebar-brand {
             justify-content: center;
         }
 
@@ -101,10 +101,14 @@
             margin-left: var(--sidebar-collapsed);
         }
 
-        /* ---- MOBILE: bottom nav overrides sidebar ---- */
+        /* ---- MOBILE: hide sidebar, show bottom nav ---- */
         @media screen and (max-width: 1023px) {
             .sidebar {
-                display: none;
+                display: none !important;
+            }
+
+            .toggle-btn {
+                display: none !important;
             }
 
             .main-content {
@@ -128,6 +132,10 @@
         @media screen and (min-width: 1024px) {
             .sidebar {
                 display: flex !important;
+            }
+
+            .toggle-btn {
+                display: inline-flex !important;
             }
 
             .main-content {
@@ -259,6 +267,12 @@
         }
 
         .card { padding: 1rem; }
+
+        /* ---- DASHBOARD CARDS (shared: instructor + student) ---- */
+        .cc-card {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+        }
 
         /* ---- BUTTONS ---- */
         .btn-primary {
@@ -458,9 +472,39 @@
         /* ---- EXAM TIMER / SIDEBAR OVERRIDES ---- */
         #sidebar a { text-decoration: none; }
         #sidebar .nav-link { cursor: pointer; }
+
+        /* ---- TOAST NOTIFICATIONS ---- */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: toastIn 0.3s ease;
+            max-width: 24rem;
+            pointer-events: auto;
+        }
+        .toast-success { background: #10b981; }
+        .toast-error   { background: #dc2626; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900">
+    <div id="toastContainer" class="toast-container"></div>
     <div class="app-shell">
 
         <!-- ====== SIDEBAR ====== -->
@@ -623,6 +667,10 @@
                 <i data-lucide="file-text" class="w-5 h-5"></i>
                 <span>Results</span>
             </a>
+            <a href="{% url 'logout' %}" class="mobile-nav-link text-red-500">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Logout</span>
+            </a>
             {% elif user.profile.role == 'instructor' %}
             <a href="{% url 'instructor_dashboard' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'instructor_dashboard' %}active{% endif %}">
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
@@ -636,9 +684,29 @@
                 <i data-lucide="file-plus-2" class="w-5 h-5"></i>
                 <span>Create</span>
             </a>
+            <a href="{% url 'question_bank' %}" class="mobile-nav-link {% if request.resolver_match.url_name in 'question_bank,add_question,edit_question' %}active{% endif %}">
+                <i data-lucide="library-big" class="w-5 h-5"></i>
+                <span>Questions</span>
+            </a>
+            <a href="{% url 'assign_students' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'assign_students' %}active{% endif %}">
+                <i data-lucide="users-round" class="w-5 h-5"></i>
+                <span>Students</span>
+            </a>
+            <a href="{% url 'analytics' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                <span>Analytics</span>
+            </a>
             <a href="{% url 'instructor_results' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'instructor_results' %}active{% endif %}">
                 <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                 <span>Results</span>
+            </a>
+            <a href="{% url 'archived_exams' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'archived_exams' %}active{% endif %}">
+                <i data-lucide="archive" class="w-5 h-5"></i>
+                <span>Archive</span>
+            </a>
+            <a href="{% url 'logout' %}" class="mobile-nav-link text-red-500">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Logout</span>
             </a>
             {% endif %}
         {% endif %}
@@ -672,25 +740,20 @@
             lucide.createIcons();
         }
 
-        /* ---------- SIDEBAR TOGGLE ---------- */
-        // Restore sidebar state so it persists across page navigations
-        if (sidebar && sessionStorage.getItem('sidebar') === 'mini') {
-            sidebar.classList.add('sidebar-mini');
-            syncIcon(true);
-        }
-        if (toggle && sidebar) {
-            toggle.addEventListener('click', () => {
-                sidebar.classList.toggle('sidebar-mini');
-                sessionStorage.setItem('sidebar', sidebar.classList.contains('sidebar-mini') ? 'mini' : 'full');
-                syncIcon(sidebar.classList.contains('sidebar-mini'));
-            });
-        }
+         /* ---------- SIDEBAR TOGGLE ---------- */
+         if (sidebar && sessionStorage.getItem('sidebar') === 'mini') {
+             sidebar.classList.add('sidebar-mini');
+             syncIcon(true);
+         }
+         if (toggle && sidebar) {
+             toggle.addEventListener('click', () => {
+                 sidebar.classList.toggle('sidebar-mini');
+                 sessionStorage.setItem('sidebar', sidebar.classList.contains('sidebar-mini') ? 'mini' : 'full');
+                 syncIcon(sidebar.classList.contains('sidebar-mini'));
+             });
+         }
 
-        /* close sidebar drawer on mobile (collapsed = full hide, not mini) */
-        /* On mobile (<1024) sidebar is display:none, so toggle keyframes are handled
-           via CSS: sidebar disappears — mobile-nav provides all navigation */
-
-        lucide.createIcons();
+         lucide.createIcons();
 
         /* ---------- CONFIRM MODAL ---------- */
         const confirmModal   = document.getElementById('confirmModal');
@@ -706,6 +769,8 @@
             confirmModal.setAttribute('aria-hidden','true');
             document.body.classList.remove('overflow-hidden');
             pendingAction = null;
+            sessionStorage.removeItem('pendingArchivedSubjectId');
+            sessionStorage.removeItem('pendingArchivedExamId');
         }
 
         function openModal(opts) {
@@ -727,7 +792,7 @@
             pendingAction = typeof opts.onConfirm === 'function' ? opts.onConfirm : null;
         }
 
-        if (confirmConfirm) confirmConfirm.addEventListener('click', () => { closeModal(); if (pendingAction) pendingAction(); });
+        if (confirmConfirm) confirmConfirm.addEventListener('click', () => { const action = pendingAction; closeModal(); if (action) action(); });
         if (confirmCancel)  confirmCancel.addEventListener('click',  closeModal);
         if (confirmModal)   confirmModal.addEventListener('click', e => { if (e.target.closest('[data-confirm-close]')) closeModal(); });
 
@@ -736,22 +801,142 @@
         });
 
         document.addEventListener('click', e => {
-            const t = e.target.closest('[data-confirm]');
-            if (!t) return;
-            e.preventDefault();
-            openModal({
-                title:       t.getAttribute('data-confirm-title'),
-                message:     t.getAttribute('data-confirm-message'),
-                confirmLabel:t.getAttribute('data-confirm-label'),
-                confirmColor:t.getAttribute('data-confirm-color'),
-                onConfirm: () => {
-                    const href = t.getAttribute('href');
-                    if (href) { window.location.href = href; return; }
-                    const formId = t.getAttribute('data-confirm-form');
-                    if (formId) { const f = document.getElementById(formId); if (f) f.submit(); }
-                }
-            });
+            const trigger = e.target.closest('[data-ajax]');
+            if (!trigger) return;
+
+            const url = trigger.getAttribute('href');
+            if (!url) return;
+
+            const itemId = trigger.getAttribute('data-ajax-item');
+            const redirectUrl = trigger.getAttribute('data-redirect') || null;
+            const fallbackUrl = trigger.getAttribute('data-fallback') || url;
+            const confirmTitle = trigger.getAttribute('data-confirm-title');
+            const confirmMessage = trigger.getAttribute('data-confirm-message');
+            const confirmLabel = trigger.getAttribute('data-confirm-label');
+            const confirmColor = trigger.getAttribute('data-confirm-color');
+            const needsConfirm = trigger.hasAttribute('data-confirm');
+
+            const execute = () => {
+                trigger.classList.add('opacity-75', 'pointer-events-none');
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.json())
+                    .then(data => {
+                        trigger.classList.remove('opacity-75', 'pointer-events-none');
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            if (itemId) {
+                                const el = document.getElementById(itemId);
+                                if (el) {
+                                    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                                    el.style.opacity = '0';
+                                    el.style.transform = 'scale(0.96)';
+                                    setTimeout(() => el.remove(), 400);
+                                }
+                            }
+                            const archiveType = trigger.getAttribute('data-archive-type');
+                            const archiveId = trigger.getAttribute('href').split('/').filter(Boolean).pop();
+                            if (archiveType === 'subject') {
+                                sessionStorage.setItem('pendingArchivedSubjectId', archiveId);
+                            } else if (archiveType === 'exam') {
+                                sessionStorage.setItem('pendingArchivedExamId', archiveId);
+                            }
+                            if (redirectUrl) {
+                                setTimeout(() => { window.location.href = redirectUrl; }, 350);
+                            } else if (trigger.hasAttribute('data-redirect-referrer')) {
+                                setTimeout(() => {
+                                    if (document.referrer && document.referrer.includes(window.location.origin)) {
+                                        window.history.back();
+                                    } else {
+                                        window.location.href = fallbackUrl;
+                                    }
+                                }, 350);
+                            }
+                        } else {
+                            showToast(data.error || 'Action failed', 'error');
+                        }
+                    })
+                    .catch(() => {
+                        trigger.classList.remove('opacity-75', 'pointer-events-none');
+                        showToast('Network error. Redirecting...', 'error');
+                        setTimeout(() => { window.location.href = url; }, 800);
+                    });
+            };
+
+            if (needsConfirm && confirmTitle) {
+                e.preventDefault();
+                openModal({
+                    title: confirmTitle,
+                    message: confirmMessage,
+                    confirmLabel: confirmLabel,
+                    confirmColor: confirmColor,
+                    onConfirm: execute
+                });
+            } else if (!trigger.hasAttribute('data-confirm')) {
+                e.preventDefault();
+                execute();
+            }
         });
+
+        /* ---------- SMART BACK ---------- */
+        function smartBack(el) {
+            const fallback = el ? el.getAttribute('href') : '/';
+            if (document.referrer && document.referrer.includes(window.location.origin)) {
+                window.history.back();
+            } else {
+                window.location.href = fallback;
+            }
+        }
+
+        /* ---------- CROSS-PAGE STATE SYNC ---------- */
+        function syncArchivedItems() {
+            const archivedSubjectId = sessionStorage.getItem('pendingArchivedSubjectId');
+            const archivedExamId = sessionStorage.getItem('pendingArchivedExamId');
+
+            if (archivedSubjectId) {
+                const el = document.getElementById('dash-subject-' + archivedSubjectId) ||
+                           document.getElementById('subject-' + archivedSubjectId) ||
+                           document.getElementById('archived-subject-' + archivedSubjectId);
+                if (el) {
+                    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.96)';
+                    setTimeout(() => el.remove(), 400);
+                }
+                sessionStorage.removeItem('pendingArchivedSubjectId');
+            }
+
+            if (archivedExamId) {
+                const el = document.getElementById('dash-exam-' + archivedExamId) ||
+                           document.getElementById('exam-' + archivedExamId) ||
+                           document.getElementById('archived-exam-' + archivedExamId);
+                if (el) {
+                    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.96)';
+                    setTimeout(() => el.remove(), 400);
+                }
+                sessionStorage.removeItem('pendingArchivedExamId');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', syncArchivedItems);
+        window.addEventListener('pageshow', syncArchivedItems);
+
+        /* ---------- TOAST NOTIFICATIONS ---------- */
+        function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + (type || 'success');
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     </script>
     {% block extra_scripts %}{% endblock %}
 </body>

@@ -1,11 +1,12 @@
 import csv
 import pytz
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db import transaction
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
+from django.conf import settings
 from django.db.models import Count, Avg, Q, Subquery, OuterRef, IntegerField, F, Value
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
@@ -110,21 +111,40 @@ def logout_view(request):
 @login_required
 def profile(request):
     profile = Profile.objects.get(user=request.user)
-    
+    user = request.user
+
     if profile.role == 'instructor':
-        subject_count = Subject.objects.filter(instructor=request.user).count()
-        exam_count = Exam.objects.filter(subject__instructor=request.user).count()
-        question_count = Question.objects.filter(subject__instructor=request.user).count()
+        subject_count = Subject.objects.filter(instructor=user).count()
+        exam_count = Exam.objects.filter(subject__instructor=user).count()
+        question_count = Question.objects.filter(subject__instructor=user).count()
+        student_count = User.objects.filter(
+            subjects__instructor=user, profile__role='student'
+        ).distinct().count()
+        certificate_count = 0
     else:
-        subject_count = SubjectAssignment.objects.filter(student=request.user).count()
-        exam_count = ExamAttempt.objects.filter(student=request.user, status='completed').count()
+        subject_count = SubjectAssignment.objects.filter(student=user).count()
+        exam_count = ExamAttempt.objects.filter(student=user, status='completed').count()
         question_count = 0
+        student_count = 0
+        certificate_count = ExamResult.objects.filter(student=user).count()
+
+    if request.method == 'POST':
+        user.first_name = request.POST.get('first_name', '').strip()
+        user.last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        if email:
+            user.email = email
+        user.save()
+        messages.success(request, 'Your profile has been updated.')
+        return redirect('profile')
 
     return render(request, 'profile.html', {
         'profile': profile,
         'subject_count': subject_count,
         'exam_count': exam_count,
-        'question_count': question_count
+        'question_count': question_count,
+        'certificate_count': certificate_count,
+        'student_count': student_count,
     })
 
 
@@ -255,35 +275,118 @@ def student_dashboard(request):
             'count': len(exam_list)
         })
 
-    completed_attempts = ExamAttempt.objects.filter(
-        student=request.user,
-        status='completed'
-    ).aggregate(avg_score=Avg('score'))
+    recent_attempts = ExamAttempt.objects.filter(
+        student=request.user
+    ).select_related('exam', 'exam__subject').order_by('-start_time')[:6]
 
-    avg_score = completed_attempts.get('avg_score')
+    total_in_progress = sum(
+        1 for subject in data for exam in subject['exams']
+        if exam['status'] == 'In Progress'
+    )
 
     return render(request, 'student_dashboard.html', {
         'data': data,
         'total_available': total_available,
         'total_completed': total_completed,
-        'avg_score': avg_score
+        'total_in_progress': total_in_progress,
+        'recent_attempts': recent_attempts,
     })
 
 
 @login_required
 @instructor_required
 def instructor_dashboard(request):
-    subjects = Subject.objects.filter(instructor=request.user).annotate(enrolled_count=Count('subjectassignment'))
-    exams = Exam.objects.filter(subject__instructor=request.user, is_archived=False).select_related('subject', 'subject__instructor')
-    archived_count = Exam.objects.filter(subject__instructor=request.user, is_archived=True).count()
+    now = timezone.now()
+    instructor = request.user
+
+    subjects = Subject.objects.filter(instructor=instructor, is_archived=False).annotate(
+        enrolled_count=Count('subjectassignment', distinct=True),
+        exam_count=Count('exam', distinct=True),
+        question_count=Count('question', distinct=True),
+    )
     subjects_count = subjects.count()
-    
+    subjects_with_exams = subjects.filter(exam_count__gt=0).count()
+    subjects_empty = subjects_count - subjects_with_exams
+
+    exams = Exam.objects.filter(subject__instructor=instructor, is_archived=False).select_related(
+        'subject'
+    ).annotate(
+        attempt_count=Count('examattempt', distinct=True),
+        enrolled_count=Count('subject__subjectassignment', distinct=True),
+    )
+
+    def exam_status(exam):
+        if exam.available_from and now < exam.available_from:
+            return 'scheduled'
+        if not exam.is_active:
+            return 'closed'
+        if exam.available_until and now > exam.available_until:
+            return 'closed'
+        return 'live'
+
+    for exam in exams:
+        exam.status_key = exam_status(exam)
+
+    archived_count = Exam.objects.filter(subject__instructor=instructor, is_archived=True).count()
+
     recent_attempts = ExamAttempt.objects.filter(
-        exam__subject__instructor=request.user
+        exam__subject__instructor=instructor
     ).select_related('student', 'exam', 'exam__subject').order_by('-start_time')[:10]
-    
-    total_students = SubjectAssignment.objects.filter(subject__instructor=request.user).count()
-    total_questions = Question.objects.filter(subject__instructor=request.user).count()
+
+    # ---- Contextual metrics ----
+    live_count = sum(1 for e in exams if e.status_key == 'live')
+    scheduled_count = sum(1 for e in exams if e.status_key == 'scheduled')
+    closed_count = sum(1 for e in exams if e.status_key == 'closed')
+
+    total_students = SubjectAssignment.objects.filter(
+        subject__instructor=instructor
+    ).values('student').distinct().count()
+    active_now = ExamAttempt.objects.filter(
+        exam__subject__instructor=instructor, status='in_progress'
+    ).count()
+
+    archived_logs = IntegrityLog.objects.filter(
+        exam__subject__instructor=instructor, exam__is_archived=True
+    )
+    archived_reviewed = archived_logs.filter(is_reviewed=True).count()
+    archive_pending = archived_logs.filter(is_reviewed=False).count()
+
+    metrics = {
+        'active_exams': exams.count(),
+        'live_count': live_count,
+        'scheduled_count': scheduled_count,
+        'closed_count': closed_count,
+        'total_students': total_students,
+        'enrolled_unique': total_students,
+        'active_now': active_now,
+        'subjects_count': subjects_count,
+        'subjects_with_exams': subjects_with_exams,
+        'subjects_empty': subjects_empty,
+        'archived_count': archived_count,
+        'archived_reviewed': archived_reviewed,
+        'archive_pending': archive_pending,
+    }
+
+    # ---- Logic-based system insights (no AI) ----
+    high_risk_attempts = ExamAttempt.objects.filter(
+        exam__subject__instructor=instructor,
+        risk_level__in=['HIGH', 'CRITICAL'],
+    ).count()
+    pending_reviews = IntegrityLog.objects.filter(
+        exam__subject__instructor=instructor, is_reviewed=False
+    ).count()
+    completed_total = ExamAttempt.objects.filter(
+        exam__subject__instructor=instructor,
+        status='completed',
+    ).count()
+
+    insights = {
+        'high_risk_attempts': high_risk_attempts,
+        'pending_reviews': pending_reviews,
+        'in_progress_now': active_now,
+        'completed_total': completed_total,
+        'has_alerts': high_risk_attempts > 0 or pending_reviews > 0,
+    }
 
     return render(request, 'instructor_dashboard.html', {
         'subjects': subjects,
@@ -291,8 +394,8 @@ def instructor_dashboard(request):
         'archived_count': archived_count,
         'subjects_count': subjects_count,
         'recent_attempts': recent_attempts,
-        'total_students': total_students,
-        'total_questions': total_questions,
+        'metrics': metrics,
+        'insights': insights,
     })
 
 
@@ -441,7 +544,15 @@ def create_exam(request):
         title = request.POST['title']
         duration = request.POST.get('duration', '').strip()
         duration_enabled = request.POST.get('duration_enabled') == 'on'
-        total_questions = request.POST['total_questions']
+        total_questions = request.POST.get('total_questions', '').strip()
+        try:
+            total_questions = int(total_questions)
+        except ValueError:
+            messages.error(request, "Questions per Student must be a valid number.")
+            return redirect('create_exam')
+        if total_questions < 1 or total_questions > settings.MAX_QUESTIONS_PER_EXAM:
+            messages.error(request, f"Questions per Student must be between 1 and {settings.MAX_QUESTIONS_PER_EXAM}.")
+            return redirect('create_exam')
         randomize = request.POST.get('randomize') == 'on'
         available_from_raw = request.POST.get('available_from', '').strip()
         available_until_raw = request.POST.get('available_until', '').strip()
@@ -470,7 +581,7 @@ def create_exam(request):
 
         return redirect('manage_exam', exam_id=new_exam.id)
 
-    return render(request, 'create_exam.html', {'subjects': subjects, 'exams': exams})
+    return render(request, 'create_exam.html', {'subjects': subjects, 'exams': exams, 'max_questions': settings.MAX_QUESTIONS_PER_EXAM})
 
 
 @login_required
@@ -490,6 +601,7 @@ def manage_exam(request, exam_id):
         'subjects': subjects,
         'questions': questions,
         'bank_count': bank_count,
+        'max_questions': settings.MAX_QUESTIONS_PER_EXAM,
     })
 
 @login_required
@@ -515,6 +627,15 @@ def update_exam(request, exam_id):
             messages.error(request, "All required fields must be filled in.")
             return redirect('manage_exam', exam_id=exam.id)
 
+        try:
+            total_questions_val = int(total_questions)
+        except ValueError:
+            messages.error(request, "Questions per Student must be a valid number.")
+            return redirect('manage_exam', exam_id=exam.id)
+        if total_questions_val < 1 or total_questions_val > settings.MAX_QUESTIONS_PER_EXAM:
+            messages.error(request, f"Questions per Student must be between 1 and {settings.MAX_QUESTIONS_PER_EXAM}.")
+            return redirect('manage_exam', exam_id=exam.id)
+
         subject = get_object_or_404(Subject, id=subject_id, instructor=request.user)
 
         exam.title = title
@@ -523,7 +644,7 @@ def update_exam(request, exam_id):
         if duration_enabled and duration:
             exam.duration = int(duration)
         exam.duration_enabled = duration_enabled
-        exam.total_questions = int(total_questions)
+        exam.total_questions = total_questions_val
         exam.randomize_questions = randomize
         exam.available_from = parse_datetime(available_from_raw) if available_from_raw else None
         exam.available_until = parse_datetime(available_until_raw) if available_until_raw else None
@@ -647,7 +768,7 @@ def add_questions_to_exam(request, exam_id):
 @login_required
 @instructor_required
 def subjects(request):
-    subjects_list = Subject.objects.filter(instructor=request.user).order_by('-created_at', 'name')
+    subjects_list = Subject.objects.filter(instructor=request.user, is_archived=False).order_by('-created_at', 'name')
     
     # Calculate counts manually for each subject
     subjects_data = []
@@ -684,18 +805,13 @@ def certificate(request, result_id):
     if not attempt:
         return redirect('my_results')
 
-    return render(request, 'certificate_pdf.html', {
+    return render(request, 'certificate.html', {
         'result': result,
         'attempt': attempt,
         'student': result.student,
         'exam': result.exam,
         'subject': result.exam.subject,
     })
-
-
-@login_required
-def certificate_pdf(request, result_id):
-    return redirect('certificate', result_id=result_id)
 
 
 @login_required
@@ -727,21 +843,19 @@ def student_subjects(request):
 @login_required
 @instructor_required
 def create_subject(request):
-    subjects = Subject.objects.filter(instructor=request.user).annotate(
-        exam_count=Count('exam'),
-        question_count=Count('question'),
-        enrolled_count=Count('subjectassignment')
+    subjects = Subject.objects.filter(instructor=request.user, is_archived=False).annotate(
+        exam_count=Count('exam', distinct=True),
+        question_count=Count('question', distinct=True),
+        enrolled_count=Count('subjectassignment', distinct=True)
     ).order_by('-created_at', 'name')
 
     if request.method == 'POST':
         name = request.POST.get('name')
         code = request.POST.get('code')
-        description = request.POST.get('description')
 
         Subject.objects.create(
             name=name,
             code=code,
-            description=description,
             instructor=request.user
         )
 
@@ -762,8 +876,12 @@ def delete_subject(request, subject_id):
     subject = get_object_or_404(Subject, id=subject_id, instructor=request.user)
     subject_name = subject.name
     subject.delete()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': f"Subject '{subject_name}' has been deleted."})
+
     messages.success(request, f"Subject '{subject_name}' has been deleted.")
-    return redirect('create_subject')
+    return redirect('archived_exams')
 
 
 @login_required
@@ -774,7 +892,6 @@ def edit_subject(request, subject_id):
     if request.method == 'POST':
         subject.name = request.POST.get('name')
         subject.code = request.POST.get('code')
-        subject.description = request.POST.get('description')
         subject.save()
         messages.success(request, f"Subject '{subject.name}' updated successfully!")
         return redirect('manage_subject', subject.id)
@@ -1495,12 +1612,18 @@ def clear_logs(request):
 @instructor_required
 def archive_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
-    
+
     if exam.subject.instructor != request.user:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
         return redirect('instructor_dashboard')
-    
+
     exam.is_archived = True
     exam.save()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': f"Exam '{exam.title}' has been archived."})
+
     messages.success(request, f"Exam '{exam.title}' has been archived.")
     return redirect('instructor_dashboard')
 
@@ -1508,12 +1631,18 @@ def archive_exam(request, exam_id):
 @instructor_required
 def restore_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
-    
+
     if exam.subject.instructor != request.user:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
         return redirect('instructor_dashboard')
-    
+
     exam.is_archived = False
     exam.save()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': f"Exam '{exam.title}' has been restored."})
+
     messages.success(request, f"Exam '{exam.title}' has been restored.")
     return redirect('archived_exams')
 
@@ -1521,17 +1650,68 @@ def restore_exam(request, exam_id):
 @instructor_required
 def delete_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
-    
+
     if exam.subject.instructor != request.user:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
         return redirect('instructor_dashboard')
-    
+
     exam_title = exam.title
     exam.delete()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': f"Exam '{exam_title}' has been deleted."})
+
     messages.success(request, f"Exam '{exam_title}' has been deleted.")
     return redirect('archived_exams')
 
 @login_required
 @instructor_required
 def archived_exams(request):
+    subjects = Subject.objects.filter(instructor=request.user, is_archived=True).annotate(
+        exam_count=Count('exam', distinct=True)
+    )
     exams = Exam.objects.filter(subject__instructor=request.user, is_archived=True)
-    return render(request, 'archived_exams.html', {'exams': exams})
+    return render(request, 'archived_exams.html', {'subjects': subjects, 'exams': exams})
+
+
+@login_required
+@instructor_required
+def archive_subject(request, subject_id):
+    subject = get_object_or_404(Subject, id=subject_id, instructor=request.user)
+    subject.is_archived = True
+    subject.archived_at = timezone.now()
+    subject.save()
+    # Cascading rule: archiving a subject archives all of its exams.
+    Exam.objects.filter(subject=subject).update(is_archived=True)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': f"Subject '{subject.name}' and its exams have been archived."})
+
+    messages.success(request, f"Subject '{subject.name}' and its exams have been archived.")
+    return redirect('archived_exams')
+
+
+@login_required
+@instructor_required
+def restore_subject(request, subject_id):
+    subject = get_object_or_404(Subject, id=subject_id, instructor=request.user, is_archived=True)
+    subject.is_archived = False
+    subject.archived_at = None
+    subject.save()
+    # Non-cascading: archived exams under this subject stay archived and are
+    # restored individually from within the subject in the Archive Section.
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': f"Subject '{subject.name}' has been restored."})
+
+    messages.success(request, f"Subject '{subject.name}' has been restored.")
+    return redirect('archived_exams')
+
+
+@login_required
+@instructor_required
+def archived_subject(request, subject_id):
+    subject = get_object_or_404(Subject, id=subject_id, instructor=request.user, is_archived=True)
+    exams = Exam.objects.filter(subject=subject, is_archived=True)
+    return render(request, 'archived_subject.html', {'subject': subject, 'exams': exams})

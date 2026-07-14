@@ -16,6 +16,12 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+# Maximum number of questions that can be served to a student in a single exam.
+# The question bank itself can hold unlimited questions; this only bounds the
+# per-student exam size. Raise for long certification-style exams if needed.
+MAX_QUESTIONS_PER_EXAM = 100
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 

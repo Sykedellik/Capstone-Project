@@ -1,5 +1,7 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator
 import pytz
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -36,6 +38,8 @@ class Subject(models.Model):
     students = models.ManyToManyField(User, related_name="subjects", blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    is_archived = models.BooleanField(default=False, db_index=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         if self.code:
@@ -59,7 +63,9 @@ class Exam(models.Model):
     description = models.TextField(blank=True, null=True)
     duration = models.IntegerField(null=True, blank=True, help_text="Minutes allowed; ignored when duration_enabled is False.")
     duration_enabled = models.BooleanField(default=True, help_text="When disabled, students have unlimited time.")
-    total_questions = models.IntegerField()
+    total_questions = models.IntegerField(
+        validators=[MaxValueValidator(settings.MAX_QUESTIONS_PER_EXAM)]
+    )
     randomize_questions = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True, help_text="Instructors can manually open/close an exam regardless of the time window.")
     questions = models.ManyToManyField('Question', blank=True, related_name='exams')

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Archived Subject{% endblock %}
+{% block page_heading %}Archive{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ─────────────── HEADER ──────────────────────────────── -->
+    <section class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-label mb-2">Archive</p>
+            <h1 class="text-h1">{{ subject.name }}</h1>
+            <p class="text-body mt-2">
+                {% if subject.code %}<span class="font-semibold">{{ subject.code }}</span> &middot; {% endif %}
+                Archived on {{ subject.archived_at|date:"M d, Y" }}
+            </p>
+        </div>
+        <a href="{% url 'archived_exams' %}" class="btn-secondary" onclick="smartBack(this); return false;">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Back</span>
+        </a>
+    </section>
+
+    <!-- ─────────────── SUBJECT ACTIONS ─────────────────────── -->
+    <section class="card flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-label mb-1">Subject</p>
+            <p class="text-sm font-semibold text-slate-900">Restore or permanently delete this subject.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'restore_subject' subject.id %}"
+               class="btn-primary"
+               data-confirm
+               data-ajax
+               data-redirect-referrer
+               data-confirm-title="Restore Subject"
+               data-confirm-message="Restore '{{ subject.name }}'? The subject will return to your active subjects. Its archived exams can be restored individually."
+               data-confirm-label="Restore"
+               data-confirm-color="#10b981">
+                <i data-lucide="archive-restore" class="h-4 w-4"></i>
+                <span>Restore Subject</span>
+            </a>
+            <a href="{% url 'delete_subject' subject.id %}"
+               class="btn-danger"
+               data-confirm
+               data-ajax
+               data-redirect-referrer
+               data-confirm-title="Delete Subject"
+               data-confirm-message="Permanently delete '{{ subject.name }}' and all its exams, questions, enrollments, and results? This cannot be undone."
+               data-confirm-label="Delete Subject"
+               data-confirm-color="#dc2626">
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+                <span>Delete Subject</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ─────────────── ARCHIVED EXAMS ─────────────────────── -->
+    <section class="card">
+        <div class="mb-4">
+            <h2 class="text-h2">Archived Exams</h2>
+            <p class="text-body mt-1">Exams archived with this subject. Restore them individually or delete permanently.</p>
+        </div>
+
+        {% if exams %}
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {% for exam in exams %}
+            <article class="card flex flex-col shadow-sm" id="archived-exam-{{ exam.id }}">
+                <div class="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-slate-900 leading-snug truncate">{{ exam.title }}</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Archived</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 text-xs text-slate-500 mb-4">
+                    <span class="inline-flex items-center gap-1.5">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                        {% if exam.duration_enabled %}{{ exam.duration|default_if_none:"—" }} min{% else %}Unlimited{% endif %}
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-slate-400"></i>
+                        {{ exam.total_questions }} questions
+                    </span>
+                </div>
+
+                <div class="flex gap-2 pt-3 border-t border-slate-100 mt-auto">
+                    <a href="{% url 'restore_exam' exam.id %}" class="btn-primary flex-1 justify-center" data-ajax data-ajax-item="archived-exam-{{ exam.id }}">
+                        <i data-lucide="archive-restore" class="h-4 w-4"></i>
+                        <span>Restore</span>
+                    </a>
+                    <a href="{% url 'delete_exam' exam.id %}"
+                       class="btn-danger flex-1 justify-center"
+                       data-confirm
+                       data-ajax
+                       data-ajax-item="archived-exam-{{ exam.id }}"
+                       data-confirm-title="Delete Archived Exam"
+                       data-confirm-message="Permanently delete '{{ exam.title }}'? This cannot be undone."
+                       data-confirm-label="Delete Exam"
+                       data-confirm-color="#dc2626">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                        <span>Delete</span>
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="rounded-md border border-dashed border-slate-300 p-6 text-center text-slate-500">
+            No archived exams under this subject.
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

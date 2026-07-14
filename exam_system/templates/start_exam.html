@@ -107,18 +107,26 @@
         }
         
         .question-nav-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #e2e8f0;
-            transition: all 0.2s;
+            width: 12px;
+            height: 12px;
+            border-radius: 9999px;
+            background: #cbd5e1;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+            transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+            cursor: pointer;
+        }
+        .question-nav-dot:hover {
+            transform: scale(1.3);
+            background: #94a3b8;
         }
         .question-nav-dot.answered {
             background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
         }
         .question-nav-dot.current {
             background: #2563eb;
-            transform: scale(1.3);
+            transform: scale(1.55);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.20);
         }
     </style>
 </head>
@@ -162,13 +170,39 @@
         </div>
     </div>
 
-    <!-- PROGRESS BAR -->
-    <div class="bg-white border-b border-slate-100">
+    <!-- NAVIGATION PALETTE -->
+    <div class="bg-white border-b border-slate-100" id="navArea">
         <div class="exam-container px-4 py-2 sm:px-6">
-            <div class="flex flex-wrap gap-2">
-                {% for q in questions %}
-                <button type="button" onclick="goToQuestion({{ forloop.counter }})" class="question-nav-dot {% if saved_answers|get_item:q.id %}answered{% endif %} {% if current_index == forloop.counter %}current{% endif %}" title="Question {{ forloop.counter }}"></button>
-                {% endfor %}
+            <!-- Dot mode (overview) -->
+            <div id="navDots" class="max-h-32 overflow-y-auto rounded-xl bg-slate-50/70 p-1">
+                <div class="flex flex-wrap gap-2.5 p-1.5">
+                    {% for q in questions %}
+                    <button type="button" onclick="goToQuestion({{ forloop.counter }})"
+                        class="question-nav-dot {% if saved_answers|get_item:q.id %}answered{% endif %} {% if current_index == forloop.counter %}current{% endif %} {% if forloop.counter|divisibleby:10 %}mr-3 sm:mr-4{% endif %}"
+                        title="Question {{ forloop.counter }}"></button>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Compact mode (high volume) -->
+            <div id="navCompact" class="hidden items-center gap-3 py-1">
+                <div class="flex-1">
+                    <div class="mb-1 flex items-center justify-between text-xs">
+                        <span class="font-medium text-slate-600">Progress</span>
+                        <span class="font-semibold text-slate-900">{{ answered_count }}/{{ questions|length }}</span>
+                    </div>
+                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                        <div class="h-full rounded-full bg-blue-600" style="width: {{ progress_percent }}%"></div>
+                    </div>
+                </div>
+                <select id="jumpSelect" onchange="if(this.value) goToQuestion(parseInt(this.value))"
+                    class="field-input py-1.5 text-sm" style="width:auto;">
+                    <option value="">Jump to…</option>
+                    {% for q in questions %}
+                    <option value="{{ forloop.counter }}" {% if current_index == forloop.counter %}selected{% endif %}>
+                        Q{{ forloop.counter }} — {% if saved_answers|get_item:q.id %}Answered{% else %}Unanswered{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
     </div>
@@ -256,6 +290,16 @@
 
     <script>
         lucide.createIcons();
+
+        var TOTAL_QUESTIONS = {{ questions|length }};
+        function applyNavMode() {
+            var threshold = window.innerWidth < 640 ? 40 : 60;
+            var compact = TOTAL_QUESTIONS > threshold;
+            document.getElementById('navDots').style.display = compact ? 'none' : '';
+            document.getElementById('navCompact').style.display = compact ? 'flex' : 'none';
+        }
+        window.addEventListener('resize', applyNavMode);
+        applyNavMode();
 
         let isSubmitting = false;
         let lastEventTime = 0;

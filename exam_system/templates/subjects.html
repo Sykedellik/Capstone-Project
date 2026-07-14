@@ -66,7 +66,7 @@
     {% if subjects %}
     <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {% for subject in subjects %}
-        <article class="card flex flex-col">
+        <article class="card flex flex-col" id="subject-{{ subject.id }}">
             <div class="flex-1">
                 <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
                     <h2 class="text-base font-semibold text-slate-900 leading-snug">{{ subject.name }}</h2>
@@ -87,6 +87,29 @@
                         {{ subject.enrolled_count|default:0 }} student{{ subject.enrolled_count|default:0|pluralize }}
                     </span>
                 </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+                <a href="{% url 'manage_subject' subject.id %}" class="btn-secondary">
+                    <i data-lucide="settings" class="h-4 w-4"></i>
+                    <span>Manage</span>
+                </a>
+                <a href="{% url 'edit_subject' subject.id %}" class="btn-secondary">
+                    <i data-lucide="pencil" class="h-4 w-4"></i>
+                    <span>Edit</span>
+                </a>
+                <a href="{% url 'archive_subject' subject.id %}"
+                   class="btn-secondary"
+                   data-confirm
+                   data-ajax
+                   data-ajax-item="subject-{{ subject.id }}"
+                   data-confirm-title="Archive Subject"
+                   data-confirm-message="Archive '{{ subject.name }}'? All its exams will also be archived. You can restore everything later from the Archive section."
+                   data-confirm-label="Archive Subject"
+                   data-confirm-color="#64748b">
+                    <i data-lucide="archive" class="h-4 w-4"></i>
+                    <span>Archive</span>
+                </a>
             </div>
         </article>
         {% endfor %}

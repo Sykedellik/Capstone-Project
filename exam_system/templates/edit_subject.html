@@ -11,9 +11,9 @@
             <h1 class="text-h1">Edit Subject</h1>
             <p class="text-body mt-2">Update the subject details.</p>
         </div>
-        <a href="{% url 'manage_subject' subject.id %}" class="btn-secondary">
+        <a href="{% url 'manage_subject' subject.id %}" class="btn-secondary" onclick="smartBack(this); return false;">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            <span>Back to Subject</span>
+            <span>Back</span>
         </a>
     </section>
 
@@ -29,11 +29,6 @@
             <div>
                 <label class="field-label">Subject Code (Optional)</label>
                 <input type="text" name="code" value="{{ subject.code|default:'' }}" class="field-input" placeholder="e.g. CS101">
-            </div>
-
-            <div>
-                <label class="field-label">Description (Optional)</label>
-                <textarea name="description" class="field-textarea min-h-[120px]" placeholder="Describe this subject...">{{ subject.description|default:'' }}</textarea>
             </div>
 
             <div class="flex flex-wrap gap-3">
